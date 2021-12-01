@@ -1,86 +1,48 @@
 package subscriber;
 
-// Java implementation for a client
-// Save file as Client.java
+import org.json.JSONObject;
 
-import java.io.*;
+import java.util.Random;
 import java.net.*;
+import java.io.*;
 import java.util.Scanner;
 
-// Client class
 public class Application {
-    static final int SERVER_PORT = 8080;
-    static final int BUFFER_SIZE = 4096;
-    static String HOST_NAME = "localhost";
-    private static String getFileName(String message) {
-        return message.replace("FILE=", "");
-    }
+    public final static int sensor = 0;
+    public final static String MAC = "22:33:44:55:66:77";
 
-    private static long getFileSize(String message) {
-        return Long.parseLong(message.replace("FILE_SIZE=", ""));
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        String receive;
+        String pre = "no";
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Input from client - location: ");
+        String location = sc.nextLine();
+        System.out.print("Input from client - HOSTNAME: ");
+        String HOSTNAME = sc.nextLine();
+        System.out.print("Input from client - PORT: ");
+        int PORT = sc.nextInt();
         try {
-            Scanner scn = new Scanner(System.in);
-
-            // getting localhost ip
-            InetAddress ip = InetAddress.getByName(HOST_NAME);
-
-            // establish the connection with server port 8080
-            Socket s = new Socket(ip, SERVER_PORT);
-            // obtaining input and out streams
-            DataInputStream dis = new DataInputStream(new BufferedInputStream(s.getInputStream()));
-            DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-
-            // the following loop performs the exchange of
-            // information between client and client handler
+            Socket connection = new Socket(HOSTNAME, PORT);
+            DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
+            BufferedReader recBuff = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             while (true) {
-                System.out.println("Enter file name to download: ");
-                String tosend = scn.nextLine();
-                dos.writeUTF(tosend);
-
-                // If client sends exit,close this connection
-                // and then break from the while loop
-                if (tosend.equals("Exit")) {
-                    System.out.println("Closing this connection : " + s);
-                    s.close();
-                    System.out.println("Connection closed");
-                    break;
+                if (pre.equalsIgnoreCase("no")) {
+                    JSONObject jo = new JSONObject();
+                    jo.put("sensor", sensor);
+                    jo.put("MAC", MAC);
+                    sentBuff.writeUTF(jo.toString());
+                    pre = "yes";
+                } else {
+                    System.out.print("Input from client: ");
+                    Random rd = new Random();
+                    int sent = rd.nextInt(60);
+                    //sentBuff.writeBytes( String.valueOf(sent) + '\n');
                 }
-
-                // printing date or time as requested by client
-                String serverResponse = dis.readUTF();
-                System.out.println(serverResponse);
-
-                if (serverResponse.contains("FILE")) {
-                    String[] parts = serverResponse.split(";");
-
-                    String fileName = getFileName(parts[0]);
-                    long fileSize = getFileSize(parts[1]);
-
-                    byte[] buffer = new byte[BUFFER_SIZE];
-
-                    long totalsWrite = 0;
-                    int bytesRead;
-                    OutputStream outputStream = new FileOutputStream(fileName);
-                    while (totalsWrite < fileSize) {
-                        bytesRead = dis.read(buffer, 0, BUFFER_SIZE);
-                        System.out.println("Downloaded " + bytesRead + " bytes.");
-                        totalsWrite += bytesRead;
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-
-                    System.out.println("Writing completed: " + totalsWrite);
-                }
+                receive = recBuff.readLine();
+                System.out.println("FROM SERVER: " + receive);
             }
-
-            // closing resources
-            scn.close();
-            dis.close();
-            dos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            System.err.println(ex);
         }
     }
 }
