@@ -12,6 +12,11 @@ public class Sensor {
     public final static String type = "temperature";
     public final static String MAC = "11:22:33:44:55:66";
 
+    enum State {
+        HANDSHAKE,
+        PUBLISH_DATA
+    }
+
     public static void main(String[] args) {
         String receive;
         String pre = "no";
@@ -22,12 +27,15 @@ public class Sensor {
         String HOSTNAME = sc.nextLine();
         System.out.print("Input from client - PORT: ");
         int PORT = sc.nextInt();
+
+        State state = State.HANDSHAKE;
+
         try {
             Socket connection = new Socket(HOSTNAME, PORT);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
             BufferedReader recBuff = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             while (true) {
-                if (pre.equalsIgnoreCase("no")) {
+                if (state == State.HANDSHAKE) {
                     JSONObject jo = new JSONObject();
                     jo.put("sensor", sensor);
                     jo.put("MAC", MAC);
@@ -35,11 +43,11 @@ public class Sensor {
                     jo.put("location", location);
                     sentBuff.writeUTF(jo.toString());
                     pre = "yes";
+                    state = State.PUBLISH_DATA;
                 } else {
                     System.out.print("Input from client: ");
-                    Random rd = new Random();
-                    int sent = rd.nextInt(60);
-                    //sentBuff.writeBytes( String.valueOf(sent) + '\n');
+                    int sent = sc.nextInt();
+                    sentBuff.writeUTF( String.valueOf(sent));
                 }
                 receive = recBuff.readLine();
                 System.out.println("FROM SERVER: " + receive);
