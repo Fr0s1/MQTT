@@ -19,7 +19,6 @@ public class Sensor {
 
     public static void main(String[] args) {
         String receive;
-        String pre = "no";
         Scanner sc = new Scanner(System.in);
         System.out.print("Input from client - location: ");
         String location = sc.nextLine();
@@ -33,7 +32,7 @@ public class Sensor {
         try {
             Socket connection = new Socket(HOSTNAME, PORT);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
-            BufferedReader recBuff = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
             while (true) {
                 if (state == State.HANDSHAKE) {
                     JSONObject jo = new JSONObject();
@@ -42,15 +41,15 @@ public class Sensor {
                     jo.put("type", type);
                     jo.put("location", location);
                     sentBuff.writeUTF(jo.toString());
-                    pre = "yes";
                     state = State.PUBLISH_DATA;
-                } else {
+                } else if (state == State.PUBLISH_DATA) {
+                    receive = recBuff.readUTF();
+                    System.out.println("FROM SERVER: " + receive);
+
                     System.out.print("Input from client: ");
-                    int sent = sc.nextInt();
-                    sentBuff.writeUTF( String.valueOf(sent));
+                    String sent = sc.nextLine();
+                    sentBuff.writeUTF(sent);
                 }
-                receive = recBuff.readLine();
-                System.out.println("FROM SERVER: " + receive);
             }
         } catch (IOException ex) {
             System.err.println(ex);

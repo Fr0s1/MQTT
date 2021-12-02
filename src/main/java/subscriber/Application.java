@@ -11,12 +11,15 @@ public class Application {
     public final static int sensor = 0;
     public final static String MAC = "22:33:44:55:66:77";
 
+    enum State {
+        HANDSHAKE,
+        GET_SENSORS,
+        GET_DATA,
+    }
+
     public static void main(String[] args) {
         String receive;
-        String pre = "no";
         Scanner sc = new Scanner(System.in);
-        System.out.print("Input from client - location: ");
-        String location = sc.nextLine();
         System.out.print("Input from client - HOSTNAME: ");
         String HOSTNAME = sc.nextLine();
         System.out.print("Input from client - PORT: ");
@@ -24,22 +27,19 @@ public class Application {
         try {
             Socket connection = new Socket(HOSTNAME, PORT);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
-            BufferedReader recBuff = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
+            State state = State.HANDSHAKE;
             while (true) {
-                if (pre.equalsIgnoreCase("no")) {
+                if (state == State.HANDSHAKE) {
                     JSONObject jo = new JSONObject();
                     jo.put("sensor", sensor);
                     jo.put("MAC", MAC);
                     sentBuff.writeUTF(jo.toString());
-                    pre = "yes";
-                } else {
-                    System.out.print("Input from client: ");
-                    Random rd = new Random();
-                    int sent = rd.nextInt(60);
-                    //sentBuff.writeBytes( String.valueOf(sent) + '\n');
+                    state = State.GET_SENSORS;
+                } else if (state == State.GET_SENSORS) {
+                    receive = recBuff.readUTF();
+                    System.out.println("FROM SERVER: " + receive);
                 }
-                receive = recBuff.readLine();
-                System.out.println("FROM SERVER: " + receive);
             }
         } catch (IOException ex) {
             System.err.println(ex);

@@ -82,14 +82,13 @@ class ClientHandler extends Thread {
     @Override
     public void run() {
         String receive;
-        String pre = "no";
         String sent;
         State state = State.HANDSHAKE;
 
         while (true) {
             try {
-
                 receive = dis.readUTF();
+                System.out.println(receive.length());
                 System.out.println("receive from client: " + receive);
 
                 if (state == State.HANDSHAKE) {
@@ -102,9 +101,8 @@ class ClientHandler extends Thread {
                     sensorCollection.insertOne(newDevice);
 
                     state = State.WAIT_DATA;
-                    System.out.println("sent to client: Identifying..." + '\n');
-                    dos.writeBytes("Accept sensor" + '\n');
-                    pre = "yes";
+                    System.out.println("sent to client: Identifying...");
+                    dos.writeUTF("Accept sensor");
                 } else if (state == State.WAIT_DATA) {
 //                    JSONObject data = new JSONObject(receive);
 //
@@ -148,8 +146,31 @@ class ClientHandler extends Thread {
 //                        }
 //                    }
                     sent = receive + " OK!";
-                    System.out.println("sent to client:" + Integer.parseInt(receive));
-                    dos.writeBytes(sent + '\n');
+                    System.out.println("sent to client:" + receive);
+                    dos.writeUTF(sent);
+
+                    MongoCollection devices = db.getCollection("devices");
+                    Bson filter = Filters.eq("sensor", 0);
+                    MongoCursor<Document> cursor = devices.find(filter).iterator();
+
+                    while (cursor.hasNext()) {
+                        String device = cursor.next().toJson();
+                        JSONObject oj = new JSONObject(device);
+
+                        String finalSent = receive;
+                        Server.sockets.forEach(socket -> {
+                            if (socket.hashCode() == oj.getInt("socketId")) {
+                                DataOutputStream sentBuff = null;
+                                try {
+                                    sentBuff = new DataOutputStream(socket.getOutputStream());
+                                    sentBuff.writeUTF(finalSent);
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
