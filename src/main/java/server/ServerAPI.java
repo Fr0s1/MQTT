@@ -16,13 +16,13 @@ public class ServerAPI {
     static MongoClient mongoClient = MongoClients.create(mongodb_uri);
     static MongoDatabase database = mongoClient.getDatabase(mongodb_database);
 
-    static String getDevicesByDistrict(String district) {
+    static String getDevicesByLocation(String location) {
         MongoCollection devices = database.getCollection("devices");
         Bson projectionFields = Projections.fields(
                 Projections.include("type", "MAC"),
                 Projections.excludeId());
 
-        Bson filter = Filters.and(Filters.eq("location", district));
+        Bson filter = Filters.and(Filters.eq("location", location));
         MongoCursor<Document> cursor = devices.find(filter).projection(projectionFields).iterator();
 
         JSONObject data = new JSONObject();

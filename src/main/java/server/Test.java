@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
+import server.ServerAPI.*;
 
 public class Test {
     private static final int SERVER_PORT = 8080;

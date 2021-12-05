@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 
 import org.bson.conversions.Bson;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONString;
 import server.ServerAPI.*;
 
 
@@ -68,7 +70,14 @@ class ClientHandler extends Thread {
 
     enum State {
         HANDSHAKE,
-        WAIT_DATA,
+        WAIT_APPLICATION_DATA,
+        WAIT_SENSOR_DATA,
+    }
+
+    enum ApplicationHandlerState {
+        GET_SENSORS,
+        SENSOR_SELECT,
+        SEND_DATA,
     }
 
     // Contructor
@@ -84,6 +93,7 @@ class ClientHandler extends Thread {
         String receive;
         String sent;
         State state = State.HANDSHAKE;
+        ApplicationHandlerState applicationHandlerState = null;
 
         while (true) {
             try {
@@ -97,81 +107,89 @@ class ClientHandler extends Thread {
                     Document newDevice = Document.parse(receive);
 
                     newDevice.append("socketId", s.hashCode());
+                    int deviceType = newDevice.getInteger("sensor");
 
                     sensorCollection.insertOne(newDevice);
 
-                    state = State.WAIT_DATA;
                     System.out.println("sent to client: Identifying...");
-                    dos.writeUTF("Accept sensor");
-                } else if (state == State.WAIT_DATA) {
-//                    JSONObject data = new JSONObject(receive);
-//
-//                    String deviceType = data.getString("device_type");
-//
-//                    if (deviceType.equals("sensor")) {
-//                        // Get sensor data collection
-//                        MongoCollection sensorData = db.getCollection("sensor_data");
-//                        MongoCollection devices = db.getCollection("devices");
-//                        Document newDoc = Document.parse(receive);
-//
-//                        // Save sensor data to collection
-//                        sensorData.insertOne(newDoc);
-//
-//                        // When receive new data from sensor, find subscribers to push data
-//                        Bson filter = Filters.eq("socketId", s.hashCode());
-//                        Bson projectionFields = Projections.fields(
-//                                Projections.include("subscribe_sockets"),
-//                                Projections.excludeId());
-//                        MongoCursor<Document> cursor = devices.find(filter).projection(projectionFields).iterator();
-//
-//                        try {
-//                            while (cursor.hasNext()) {
-//                                String device = cursor.next().toJson();
-//                                JSONObject oj = new JSONObject(device);
-//
-//                                JSONArray subscribeSockets = oj.getJSONArray("subscribe_sockets");
-//
-//                                for (int i = 0; i < subscribeSockets.length(); i++) {
-//                                    int applicationSocketIndex = Server.sockets.indexOf(subscribeSockets.get(i));
-//
-//                                    Socket applicationSocket = Server.sockets.get(applicationSocketIndex);
-//
-//                                    DataOutputStream dos = new DataOutputStream(applicationSocket.getOutputStream());
-//
-//                                    dos.writeUTF(receive);
-//                                }
-//                            }
-//                        } finally {
-//                            cursor.close();
-//                        }
-//                    }
-                    sent = receive + " OK!";
-                    System.out.println("sent to client:" + receive);
-                    dos.writeUTF(sent);
+                    if (deviceType == 1) {
+                        dos.writeUTF("Accept sensor");
+                        state = State.WAIT_SENSOR_DATA;
 
+                    } else {
+                        dos.writeUTF("Accept application");
+                        state = State.WAIT_APPLICATION_DATA;
+                        applicationHandlerState = ApplicationHandlerState.GET_SENSORS;
+                    }
+                } else if (state == State.WAIT_APPLICATION_DATA) {
+                    JSONObject message = new JSONObject(receive);
+                    if (applicationHandlerState == ApplicationHandlerState.GET_SENSORS) {
+                        String location = message.getString("location");
+
+                        String sensorList = ServerAPI.getDevicesByLocation(location);
+
+                        dos.writeUTF(sensorList);
+
+                        applicationHandlerState = ApplicationHandlerState.SENSOR_SELECT;
+                    } else if (applicationHandlerState == ApplicationHandlerState.SENSOR_SELECT) {
+                        MongoCollection devices = db.getCollection("devices");
+
+                        String sensorMac = message.getString("MAC");
+                        Bson filter = Filters.eq("MAC", sensorMac);
+                        Bson update = Updates.push("subscribe_sockets", s.hashCode());
+                        devices.findOneAndUpdate(filter, update);
+
+                        applicationHandlerState = ApplicationHandlerState.SEND_DATA;
+
+                        dos.writeUTF("Sensor selected");
+                    }
+                } else if (state == State.WAIT_SENSOR_DATA) {
+                    dos.writeUTF(receive + " OK!");
+
+                    // Get sensor data collection
+                    MongoCollection sensorData = db.getCollection("sensor_data");
                     MongoCollection devices = db.getCollection("devices");
-                    Bson filter = Filters.eq("sensor", 0);
-                    MongoCursor<Document> cursor = devices.find(filter).iterator();
+                    Document newDoc = Document.parse(receive);
 
-                    while (cursor.hasNext()) {
-                        String device = cursor.next().toJson();
-                        JSONObject oj = new JSONObject(device);
+                    // Save sensor data to collection
+                    sensorData.insertOne(newDoc);
 
-                        String finalSent = receive;
-                        Server.sockets.forEach(socket -> {
-                            if (socket.hashCode() == oj.getInt("socketId")) {
-                                DataOutputStream sentBuff = null;
-                                try {
-                                    sentBuff = new DataOutputStream(socket.getOutputStream());
-                                    sentBuff.writeUTF(finalSent);
+                    // When receive new data from sensor, find subscribers to push data
+                    Bson filter = Filters.eq("socketId", s.hashCode());
+                    Bson projectionFields = Projections.fields(
+                            Projections.include("subscribe_sockets"),
+                            Projections.excludeId());
+                    MongoCursor<Document> cursor = devices.find(filter).projection(projectionFields).iterator();
 
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                    try {
+                        while (cursor.hasNext()) {
+                            String device = cursor.next().toJson();
+                            JSONObject oj = new JSONObject(device);
+
+                            JSONArray subscribeSockets = oj.getJSONArray("subscribe_sockets");
+                            for (int i = 0; i < subscribeSockets.length(); i++) {
+                                int subscribeSocketHashCode = subscribeSockets.getInt(i);
+
+                                String finalReceive = receive;
+                                Server.sockets.forEach(socket -> {
+                                   if (socket.hashCode() == subscribeSocketHashCode) {
+                                       try {
+                                           DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                                           dos.writeUTF(finalReceive);
+
+                                       } catch (IOException e) {
+                                           e.printStackTrace();
+                                       }
+
+                                   }
+                               });
                             }
-                        });
+                        }
+                    } finally {
+                        cursor.close();
                     }
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

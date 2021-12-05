@@ -26,7 +26,8 @@ public class Sensor {
         String HOSTNAME = sc.nextLine();
         System.out.print("Input from client - PORT: ");
         int PORT = sc.nextInt();
-
+//        sc.nextLine();
+        String sent;
         State state = State.HANDSHAKE;
 
         try {
@@ -43,12 +44,15 @@ public class Sensor {
                     sentBuff.writeUTF(jo.toString());
                     state = State.PUBLISH_DATA;
                 } else if (state == State.PUBLISH_DATA) {
+                    System.out.print("Input from client: ");
+
+                    sent = sc.nextLine();
+                    if (sent.length() != 0) {
+                        sentBuff.writeUTF(sent);
+                    }
+
                     receive = recBuff.readUTF();
                     System.out.println("FROM SERVER: " + receive);
-
-                    System.out.print("Input from client: ");
-                    String sent = sc.nextLine();
-                    sentBuff.writeUTF(sent);
                 }
             }
         } catch (IOException ex) {

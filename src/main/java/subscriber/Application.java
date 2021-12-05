@@ -14,7 +14,8 @@ public class Application {
     enum State {
         HANDSHAKE,
         GET_SENSORS,
-        GET_DATA,
+        SELECT_SENSOR,
+        WAIT_DATA,
     }
 
     public static void main(String[] args) {
@@ -24,6 +25,8 @@ public class Application {
         String HOSTNAME = sc.nextLine();
         System.out.print("Input from client - PORT: ");
         int PORT = sc.nextInt();
+        String sent;
+
         try {
             Socket connection = new Socket(HOSTNAME, PORT);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
@@ -36,9 +39,16 @@ public class Application {
                     jo.put("MAC", MAC);
                     sentBuff.writeUTF(jo.toString());
                     state = State.GET_SENSORS;
-                } else if (state == State.GET_SENSORS) {
+                } else {
+                    System.out.print("Input from client: ");
+                    sent = sc.nextLine();
+
+                    if (sent.length() != 0) {
+                        sentBuff.writeUTF(sent);
+                    }
                     receive = recBuff.readUTF();
                     System.out.println("FROM SERVER: " + receive);
+                    state = State.SELECT_SENSOR;
                 }
             }
         } catch (IOException ex) {
