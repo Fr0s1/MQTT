@@ -22,24 +22,54 @@ public class ListArea extends javax.swing.JFrame {
     /**
      * Creates new form NewJFrame
      */
-    public static String device_type = "application";
     public static String HOSTNAME = "localhost";
     public static int PORT = 8080;
+    public Socket connection;
+    public DataOutputStream sentBuff;
+    public DataInputStream recBuff;
+    public final static int sensor = 0;
+    public final static String MAC = "22:33:44:55:66:77";
+    public ListArea.State state;
+    public String receive;
+    enum State {
+        HANDSHAKE,
+        GET_SENSORS,
+        SELECT_SENSOR,
+        WAIT_DATA,
+    }
+
     public ListArea() {
         initComponents();
+        try {
+             connection = new Socket(HOSTNAME, PORT);
+             sentBuff = new DataOutputStream(connection.getOutputStream());
+             recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
+             state = State.HANDSHAKE;
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
     }
 
     public void sendMessage(String location) throws IOException {
-        Socket connection = new Socket(HOSTNAME, PORT);
-        DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
-        DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
+//        Socket connection = new Socket(HOSTNAME, PORT);
+//        DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
+//        DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
+        if(state == ListArea.State.HANDSHAKE) {
+            JSONObject jo = new JSONObject();
+            jo.put("sensor", sensor);
+            jo.put("MAC", MAC);
+            sentBuff.writeUTF(jo.toString());
+            state = ListArea.State.GET_SENSORS;
+        } else {
+            JSONObject obj = new JSONObject();
+            obj.put("location", location);
+            String jsonText = obj.toString();
+            System.out.println(jsonText);
+            sentBuff.writeUTF(jsonText);
+            receive = recBuff.readUTF();
+            System.out.println("FROM SERVER: " + receive);
+        }
 
-        JSONObject obj = new JSONObject();
-        obj.put("location", location);
-        obj.put("device_type", device_type);
-        String jsonText = obj.toString();
-        System.out.println(jsonText);
-        sentBuff.writeUTF(jsonText);
     }
 
     /**
