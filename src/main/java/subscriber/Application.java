@@ -21,14 +21,14 @@ public class Application {
     public static void main(String[] args) {
         String receive;
         Scanner sc = new Scanner(System.in);
-        System.out.print("Input from client - HOSTNAME: ");
-        String HOSTNAME = sc.nextLine();
-        System.out.print("Input from client - PORT: ");
-        int PORT = sc.nextInt();
+//        System.out.print("Input from client - HOSTNAME: ");
+//        String HOSTNAME = sc.nextLine();
+//        System.out.print("Input from client - PORT: ");
+//        int PORT = sc.nextInt();
         String sent;
 
         try {
-            Socket connection = new Socket(HOSTNAME, PORT);
+            Socket connection = new Socket("localhost", 8080);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
             DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
             State state = State.HANDSHAKE;
@@ -38,18 +38,30 @@ public class Application {
                     jo.put("sensor", sensor);
                     jo.put("MAC", MAC);
                     sentBuff.writeUTF(jo.toString());
+
                     state = State.GET_SENSORS;
-                } else {
-                    System.out.print("Input from client: ");
+                } else if (state == State.GET_SENSORS) {
+                    System.out.print("Input from client - location: ");
                     sent = sc.nextLine();
 
                     if (sent.length() != 0) {
                         sentBuff.writeUTF(sent);
                     }
-                    receive = recBuff.readUTF();
-                    System.out.println("FROM SERVER: " + receive);
+
                     state = State.SELECT_SENSOR;
+                } else if (state == State.SELECT_SENSOR) {
+                    System.out.print("Input from client - select sensor: ");
+                    sent = sc.nextLine();
+
+                    if (sent.length() != 0) {
+                        sentBuff.writeUTF(sent);
+                    }
+
+                    state = State.WAIT_DATA;
                 }
+                receive = recBuff.readUTF();
+
+                System.out.println("FROM SERVER: " + receive);
             }
         } catch (IOException ex) {
             System.err.println(ex);
