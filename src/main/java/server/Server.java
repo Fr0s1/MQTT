@@ -28,7 +28,6 @@ public class Server {
     static ArrayList<Socket> sockets = new ArrayList<>(); // Array contains all connected sockets
 
     public static void main(String[] args) throws IOException {
-
         ServerSocket ss = new ServerSocket(SERVER_PORT);
         MongoClient mongoClient = MongoClients.create(mongodb_uri);
         MongoDatabase database = mongoClient.getDatabase(mongodb_database);
@@ -51,7 +50,7 @@ public class Server {
                 Thread t = new ClientHandler(s, dis, dos, database);
 
                 t.start();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 sockets.remove(s);
                 s.close();
                 e.printStackTrace();
@@ -59,7 +58,6 @@ public class Server {
         }
     }
 }
-
 
 class ClientHandler extends Thread {
     final DataInputStream dis;

@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- *
  * @author ADMIN
  */
 public class ListArea extends javax.swing.JFrame {
@@ -29,8 +28,9 @@ public class ListArea extends javax.swing.JFrame {
     public DataInputStream recBuff;
     public final static int sensor = 0;
     public final static String MAC = "22:33:44:55:66:77";
-    public ListArea.State state = ListArea.State.HANDSHAKE;
+    public ListArea.State state = State.HANDSHAKE;
     public String receive;
+
     enum State {
         HANDSHAKE,
         GET_SENSORS,
@@ -39,22 +39,24 @@ public class ListArea extends javax.swing.JFrame {
     }
 
     public ListArea() {
-        initComponents();
+
         try {
             connection = new Socket(HOSTNAME, PORT);
             sentBuff = new DataOutputStream(connection.getOutputStream());
             recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-            state = State.HANDSHAKE;
-            if(state == ListArea.State.HANDSHAKE) {
-                JSONObject jo = new JSONObject();
-                jo.put("sensor", sensor);
-                jo.put("MAC", MAC);
-                sentBuff.writeUTF(jo.toString());
-                state = ListArea.State.GET_SENSORS;
-            }
+
+            JSONObject jo = new JSONObject();
+            jo.put("sensor", sensor);
+            jo.put("MAC", MAC);
+            sentBuff.writeUTF(jo.toString());
+            this.state = State.GET_SENSORS;
+            receive = recBuff.readUTF();
+            System.out.println("FROM SERVER: " + receive);
         } catch (IOException ex) {
             System.err.println(ex);
         }
+
+        initComponents();
     }
 
     public void sendMessage(String location) throws IOException {
@@ -73,7 +75,7 @@ public class ListArea extends javax.swing.JFrame {
 //            receive = recBuff.readUTF();
 //            System.out.println("FROM SERVER: " + receive);
 //        }
-        if(state != State.HANDSHAKE) {
+        if (this.state == State.GET_SENSORS) {
             JSONObject obj = new JSONObject();
             obj.put("location", location);
             String jsonText = obj.toString();
@@ -81,6 +83,7 @@ public class ListArea extends javax.swing.JFrame {
             sentBuff.writeUTF(jsonText);
             receive = recBuff.readUTF();
             System.out.println("FROM SERVER: " + receive);
+
         }
     }
 

@@ -21,10 +21,7 @@ public class Application {
     public static void main(String[] args) {
         String receive;
         Scanner sc = new Scanner(System.in);
-//        System.out.print("Input from client - HOSTNAME: ");
-//        String HOSTNAME = sc.nextLine();
-//        System.out.print("Input from client - PORT: ");
-//        int PORT = sc.nextInt();
+
         String sent;
 
         try {
