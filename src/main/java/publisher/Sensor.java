@@ -44,11 +44,17 @@ public class Sensor {
                     sentBuff.writeUTF(jo.toString());
                     state = State.PUBLISH_DATA;
                 } else if (state == State.PUBLISH_DATA) {
-                    System.out.print("Input from client: ");
+                    System.out.print("Input from client ('EXIT' to close connection): ");
 
                     sent = sc.nextLine();
                     if (sent.length() != 0) {
                         sentBuff.writeUTF(sent);
+                    }
+
+                    if (sent.equals("EXIT")) {
+                        connection.close();
+                        recBuff.close();
+                        sentBuff.close();
                     }
                 }
                 receive = recBuff.readUTF();
