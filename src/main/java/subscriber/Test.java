@@ -23,17 +23,17 @@ import subscriber.AplicationState;
  *
  * @author ADMIN
  */
-public class ListSensor extends javax.swing.JFrame {
+public class Test extends javax.swing.JFrame {
     //   protected ListArea listArea;
     protected String data;
     public static String HOSTNAME = "localhost";
-    public static int PORT = 8080;
+//    public static int PORT = 8080;
     public Socket connection;
-    public DataOutputStream sentBuff;
-    public DataInputStream recBuff;
+//    public DataOutputStream sentBuff;
+//    public DataInputStream recBuff;
     public final static int sensor = 0;
     public final static String MAC = "22:33:44:55:66:77";
-    //    public Test.State state = Test.State.GET_SENSORS;
+//    public Test.State state = Test.State.GET_SENSORS;
     public String receive;
 //    public String sendDatatoListSensor;
 //    enum State {
@@ -54,40 +54,40 @@ public class ListSensor extends javax.swing.JFrame {
     /**
      * Creates new form ListSensor
      */
-    public ListSensor() {
-//        try {
+    public Test() {
+        try {
 //            connection = new Socket(HOSTNAME, PORT);
 //            sentBuff = new DataOutputStream(connection.getOutputStream());
 //            recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-//
-//            JSONObject jo = new JSONObject();
-//            jo.put("sensor", sensor);
-//            jo.put("MAC", MAC);
-//            sentBuff.writeUTF(jo.toString());
-//            this.state = Test.State.SELECT_SENSOR;
-//            receive = recBuff.readUTF();
-//            System.out.println("FROM SERVER: " + receive);
-//
-//        } catch (IOException ex) {
-//            System.err.println(ex);
-//        }
+
+            JSONObject jo = new JSONObject();
+            jo.put("sensor", sensor);
+            jo.put("MAC", MAC);
+            AplicationState.sentBuff.writeUTF(jo.toString());
+            AplicationState.state = AplicationState.State.SELECT_SENSOR;
+            receive = AplicationState.recBuff.readUTF();
+            System.out.println("FROM SERVER: " + receive);
+
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
         initComponents();
     }
 
-    public ListSensor(String data) {
+    public Test(String data)  {
         this.data = data;
         try {
-            connection = new Socket(HOSTNAME, PORT);
-            sentBuff = new DataOutputStream(connection.getOutputStream());
-            recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-//            System.out.println(AplicationState.state);
-//            JSONObject jo = new JSONObject();
-//            jo.put("sensor", sensor);
-//            jo.put("MAC", MAC);
-//            sentBuff.writeUTF(jo.toString());
-//            AplicationState.state = AplicationState.State.SELECT_SENSOR;
-//            receive = recBuff.readUTF();
-//            System.out.println("FROM SERVER: " + receive);
+//            connection = new Socket(HOSTNAME, PORT);
+//            sentBuff = new DataOutputStream(connection.getOutputStream());
+//            recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
+            System.out.println(AplicationState.state);
+            JSONObject jo = new JSONObject();
+            jo.put("sensor", sensor);
+            jo.put("MAC", MAC);
+            AplicationState.sentBuff.writeUTF(jo.toString());
+            AplicationState.state = AplicationState.State.SELECT_SENSOR;
+            receive = AplicationState.recBuff.readUTF();
+            System.out.println("FROM SERVER: " + receive);
         } catch (IOException ex) {
             System.err.println(ex);
         }
@@ -102,11 +102,11 @@ public class ListSensor extends javax.swing.JFrame {
             obj.put("MAC", MAC_Address);
             String jsonText = obj.toString();
             System.out.println(jsonText);
-            sentBuff.writeUTF(jsonText);
-            receive = recBuff.readUTF();
+            AplicationState.sentBuff.writeUTF(jsonText);
+            receive = AplicationState.recBuff.readUTF();
             AplicationState.state = AplicationState.State.WAIT_DATA;
 //            result = receive;
-            System.out.println("FROM SERVER: " + receive);
+//            System.out.println("FROM SERVER: " + receive);
         }
 
     }
@@ -145,9 +145,7 @@ public class ListSensor extends javax.swing.JFrame {
             jButtons.get(i).addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     try {
-
                         sendMessage(s);
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -159,18 +157,6 @@ public class ListSensor extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }// </editor-fold>
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {
-        // TODO add your handling code here:
-    }
 
     /**
      * @param args the command line arguments
@@ -202,7 +188,7 @@ public class ListSensor extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ListSensor().setVisible(true);
+                    new Test().setVisible(true);
             }
         });
 //        new Test();

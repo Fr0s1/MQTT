@@ -7,7 +7,7 @@ import java.net.*;
 import java.io.*;
 import java.util.Scanner;
 
-public class Application {
+public class AplicationTest {
     public final static int sensor = 0;
     public final static String MAC = "22:33:44:55:66:77";
 
@@ -31,16 +31,17 @@ public class Application {
             Socket connection = new Socket("localhost", 8080);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
             DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-            State state = State.HANDSHAKE;
+            State state = State.GET_SENSORS;
             while (true) {
-                if (state == State.HANDSHAKE) {
+                if (state == State.GET_SENSORS) {
                     JSONObject jo = new JSONObject();
                     jo.put("sensor", sensor);
                     jo.put("MAC", MAC);
                     sentBuff.writeUTF(jo.toString());
 
-                    state = State.GET_SENSORS;
+                    state = State.SELECT_SENSOR;
                 } else if (state == State.GET_SENSORS) {
+                    System.out.println(state);
                     System.out.print("Input from client - location: ");
                     sent = sc.nextLine();
 
