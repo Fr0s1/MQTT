@@ -22,15 +22,16 @@ public class Sensor {
         Scanner sc = new Scanner(System.in);
         System.out.print("Input from client - location: ");
         String location = sc.nextLine();
-        System.out.print("Input from client - HOSTNAME: ");
-        String HOSTNAME = sc.nextLine();
-        System.out.print("Input from client - PORT: ");
-        int PORT = sc.nextInt();
-
+//        System.out.print("Input from client - HOSTNAME: ");
+//        String HOSTNAME = sc.nextLine();
+//        System.out.print("Input from client - PORT: ");
+//        int PORT = sc.nextInt();
+//        sc.nextLine();
+        String sent;
         State state = State.HANDSHAKE;
 
         try {
-            Socket connection = new Socket(HOSTNAME, PORT);
+            Socket connection = new Socket("localhost", 8080);
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
             DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
             while (true) {
@@ -43,13 +44,15 @@ public class Sensor {
                     sentBuff.writeUTF(jo.toString());
                     state = State.PUBLISH_DATA;
                 } else if (state == State.PUBLISH_DATA) {
-                    receive = recBuff.readUTF();
-                    System.out.println("FROM SERVER: " + receive);
-
                     System.out.print("Input from client: ");
-                    String sent = sc.nextLine();
-                    sentBuff.writeUTF(sent);
+
+                    sent = sc.nextLine();
+                    if (sent.length() != 0) {
+                        sentBuff.writeUTF(sent);
+                    }
                 }
+                receive = recBuff.readUTF();
+                System.out.println("FROM SERVER: " + receive);
             }
         } catch (IOException ex) {
             System.err.println(ex);
