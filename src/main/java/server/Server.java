@@ -57,7 +57,7 @@ public class Server {
                 System.out.println("Disconnected");
                 sockets.remove(s);
                 s.close();
-//                e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }
@@ -68,7 +68,7 @@ class ClientHandler extends Thread {
     final DataOutputStream dos;
     final MongoDatabase db;
     final Socket s;
-    static final int BUFFER_SIZE = 4096;
+    int connectedDeviceType;
 
     enum State {
         HANDSHAKE,
@@ -78,8 +78,7 @@ class ClientHandler extends Thread {
 
     enum ApplicationHandlerState {
         GET_SENSORS,
-        SENSOR_SELECT,
-        SEND_DATA,
+        SENSOR_SELECT
     }
 
     // Contructor
@@ -130,7 +129,7 @@ class ClientHandler extends Thread {
                     }
 
                     int deviceType = newDevice.getInteger("sensor");
-
+                    this.connectedDeviceType = deviceType;
                     System.out.println("sent to client: Identifying...");
                     if (deviceType == 1) {
                         dos.writeUTF("Accept sensor");
@@ -161,19 +160,24 @@ class ClientHandler extends Thread {
                             Bson update = Updates.push("subscribe_sockets", s.hashCode());
                             devices.findOneAndUpdate(filter, update);
 
-                            applicationHandlerState = ApplicationHandlerState.SEND_DATA;
-
                             dos.writeUTF("Sensor selected");
-                        } else {
+
                             MongoCollection<Document> sensor_data = db.getCollection("sensor_data");
 
-                            Bson filter = Filters.eq("MAC", selectedSensorMAC);
+                            // Send latest data in database
+                            Bson macFilter = Filters.eq("MAC", selectedSensorMAC);
+                            Bson projection = Projections.exclude("_id");
+                            MongoCursor<Document> selectedSensorData = sensor_data.find(macFilter).projection(projection).sort(descending("sent_time")).limit(4).iterator();
 
-                            MongoCursor<Document> selectedSensorData = sensor_data.find(filter).sort(descending("sent_time")).limit(4).iterator();
+                            JSONObject result = new JSONObject();
+                            while (selectedSensorData.hasNext()) {
+                                String data = selectedSensorData.next().toJson();
 
-                            System.out.println("Test");
-                            System.out.println(selectedSensorData);
-                            dos.writeUTF(selectedSensorData.toString());
+                                result.append("data", data);
+                            }
+
+                            System.out.println(result);
+                            dos.writeUTF(result.toString());
                         }
                     } catch (JSONException ignored) {
 
@@ -194,8 +198,11 @@ class ClientHandler extends Thread {
                         Bson macAddressFilter = Filters.eq("MAC", connectedDeviceMAC);
 
                         Bson removeSocketId = Updates.unset("socketId");
-                        devicesCollection.findOneAndUpdate(macAddressFilter, removeSocketId);
 
+                        Bson removeSubscriberList = Updates.unset("subscribe_sockets");
+
+                        devicesCollection.findOneAndUpdate(macAddressFilter, removeSocketId);
+                        devicesCollection.findOneAndUpdate(macAddressFilter, removeSubscriberList);
                         break;
                     } else {
                         try {
@@ -251,9 +258,30 @@ class ClientHandler extends Thread {
                 }
             } catch (IOException e) {
                 System.out.println("Device disconnected");
+                Server.sockets.remove(this.s);
+                Bson macAddressFilter = Filters.eq("MAC", connectedDeviceMAC);
+
+                Bson removeSocketId = Updates.unset("socketId");
+                devicesCollection.findOneAndUpdate(macAddressFilter, removeSocketId);
+
+                if (this.connectedDeviceType == 1) {
+                    Bson removeSubscribeSocket = Updates.unset("subscribe_sockets");
+                    devicesCollection.findOneAndUpdate(macAddressFilter, removeSubscribeSocket);
+                }
                 break;
             }
         }
+        try
+        {
+            // closing resources
+            this.dis.close();
+            this.dos.close();
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
+
+
 }
 
