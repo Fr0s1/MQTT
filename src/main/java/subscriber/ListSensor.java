@@ -26,23 +26,9 @@ import subscriber.AplicationState;
 public class ListSensor extends javax.swing.JFrame {
     //   protected ListArea listArea;
     protected String data;
-    public static String HOSTNAME = "localhost";
-    public static int PORT = 8080;
-    public Socket connection;
-    public DataOutputStream sentBuff;
-    public DataInputStream recBuff;
     public final static int sensor = 0;
     public final static String MAC = "22:33:44:55:66:77";
-    //    public Test.State state = Test.State.GET_SENSORS;
     public String receive;
-//    public String sendDatatoListSensor;
-//    enum State {
-//        HANDSHAKE,
-//        GET_SENSORS,
-//        SELECT_SENSOR,
-//        WAIT_DATA,
-//    }
-
     public void setData(String data) {
         this.data = data;
     }
@@ -55,55 +41,27 @@ public class ListSensor extends javax.swing.JFrame {
      * Creates new form ListSensor
      */
     public ListSensor() {
-//        try {
-//            connection = new Socket(HOSTNAME, PORT);
-//            sentBuff = new DataOutputStream(connection.getOutputStream());
-//            recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-//
-//            JSONObject jo = new JSONObject();
-//            jo.put("sensor", sensor);
-//            jo.put("MAC", MAC);
-//            sentBuff.writeUTF(jo.toString());
-//            this.state = Test.State.SELECT_SENSOR;
-//            receive = recBuff.readUTF();
-//            System.out.println("FROM SERVER: " + receive);
-//
-//        } catch (IOException ex) {
-//            System.err.println(ex);
-//        }
+        AplicationState.state = AplicationState.State.SELECT_SENSOR;
         initComponents();
     }
 
-    public ListSensor(String data) {
+    public ListSensor(String data)  {
         this.data = data;
-        try {
-            connection = new Socket(HOSTNAME, PORT);
-            sentBuff = new DataOutputStream(connection.getOutputStream());
-            recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-//            System.out.println(AplicationState.state);
-//            JSONObject jo = new JSONObject();
-//            jo.put("sensor", sensor);
-//            jo.put("MAC", MAC);
-//            sentBuff.writeUTF(jo.toString());
-//            AplicationState.state = AplicationState.State.SELECT_SENSOR;
-//            receive = recBuff.readUTF();
-//            System.out.println("FROM SERVER: " + receive);
-        } catch (IOException ex) {
-            System.err.println(ex);
-        }
+        AplicationState.state = AplicationState.State.SELECT_SENSOR;
+        System.out.println("FROM SERVER: " + receive);
+
         initComponents();
     }
 
     public void sendMessage(String MAC_Address) throws IOException {
         String result = "";
-        System.out.println(AplicationState.state);
         if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
             JSONObject obj = new JSONObject();
             obj.put("MAC", MAC_Address);
             String jsonText = obj.toString();
             System.out.println(jsonText);
-            sentBuff.writeUTF(jsonText);
-            receive = recBuff.readUTF();
+            AplicationState.sentBuff.writeUTF(jsonText);
+            receive = AplicationState.recBuff.readUTF();
             AplicationState.state = AplicationState.State.WAIT_DATA;
 //            result = receive;
             System.out.println("FROM SERVER: " + receive);
@@ -145,9 +103,7 @@ public class ListSensor extends javax.swing.JFrame {
             jButtons.get(i).addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     try {
-
                         sendMessage(s);
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -159,18 +115,6 @@ public class ListSensor extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }// </editor-fold>
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {
-        // TODO add your handling code here:
-    }
 
     /**
      * @param args the command line arguments

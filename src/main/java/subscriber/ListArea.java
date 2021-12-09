@@ -208,10 +208,10 @@ public class ListArea extends javax.swing.JFrame{
         // TODO add your handling code here:
         String location = "Cau Giay";
         String a = sendMessage(location);
-//        new ListSensor().setVisible(true);
-        Test listSensor = new Test(a);
+        ListSensor listSensor = new ListSensor(a);
         listSensor.setData(a);
         listSensor.setVisible(true);
+        this.dispose();
         this.dispose();
     }
 
@@ -226,21 +226,30 @@ public class ListArea extends javax.swing.JFrame{
     private void thanhxuanMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
         // TODO add your handling code here:
         String location = "Thanh Xuan";
-        sendMessage(location);
-//        new ListSensor().setVisible(true);
-//        this.dispose();
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        listSensor.setData(a);
+        listSensor.setVisible(true);
+        this.dispose();
     }
 
     private void badinhMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
         String location = "Ba Dinh";
-        sendMessage(location);
-        // TODO add your handling code here:
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        listSensor.setData(a);
+        listSensor.setVisible(true);
+        this.dispose();
     }
 
     private void hadongMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
         // TODO add your handling code here:
         String location = "Ha Dong";
-        sendMessage(location);
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        listSensor.setData(a);
+        listSensor.setVisible(true);
+        this.dispose();
     }
 
     private void thanhxuanActionPerformed(java.awt.event.ActionEvent evt) {
