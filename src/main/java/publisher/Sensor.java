@@ -6,6 +6,7 @@ import java.net.*;
 import java.io.*;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONTokener;
 
@@ -44,7 +45,6 @@ public class Sensor {
                     JSONObject jo = new JSONObject();
                     jo.put("sensor", sensor);
                     jo.put("MAC", MAC);
-                    jo.put("type", type);
                     jo.put("location", location);
                     sentBuff.writeUTF(jo.toString());
                     state = State.PUBLISH_DATA;
@@ -52,21 +52,8 @@ public class Sensor {
                     int n = rd.nextInt(array.length());
                     System.out.println("Random: "+ n );
                     JSONObject object1 = array.getJSONObject(n);
-                    try{
-                        System.out.println("Temperature  : " + object1.getString("Air Temperature"));
-                    } catch(JSONException ex ) {
-                        System.out.println("Temperature  : " + object1.getInt("Air Temperature"));
-                    }
-                    try{
-                        System.out.println("Rain Intensity: " + object1.getInt("Rain Intensity"));
-                    } catch(JSONException ex ) {
-                        System.out.println("Rain Intensity: " + object1.getString("Rain Intensity"));
-                    }
-                    try{
-                        System.out.println("Solar Radiation : " + object1.getInt("Solar Radiation"));
-                    } catch(JSONException ex ) {
-                        System.out.println("Solar Radiation : " + object1.getString("Solar Radiation"));
-                    }
+                    String time = (java.time.Clock.systemUTC().instant()).toString();
+                    object1.put("sent_time", time);
                     sentBuff.writeUTF(object1.toString());
                     try
                     {
