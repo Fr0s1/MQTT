@@ -12,6 +12,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,7 +25,7 @@ import subscriber.AplicationState;
  *
  * @author ADMIN
  */
-public class ListSensor extends javax.swing.JFrame {
+public class ListSensor {
     //   protected ListArea listArea;
     protected String data;
     public final static int sensor = 0;
@@ -48,12 +50,10 @@ public class ListSensor extends javax.swing.JFrame {
     public ListSensor(String data)  {
         this.data = data;
         AplicationState.state = AplicationState.State.SELECT_SENSOR;
-        System.out.println("FROM SERVER: " + receive);
-
         initComponents();
     }
 
-    public void sendMessage(String MAC_Address) throws IOException {
+    public String sendMessage(String MAC_Address) throws IOException {
         String result = "";
         if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
             JSONObject obj = new JSONObject();
@@ -61,13 +61,13 @@ public class ListSensor extends javax.swing.JFrame {
             String jsonText = obj.toString();
             System.out.println(jsonText);
             AplicationState.sentBuff.writeUTF(jsonText);
-            receive = AplicationState.recBuff.readUTF();
             AplicationState.state = AplicationState.State.WAIT_DATA;
-//            result = receive;
-            System.out.println("FROM SERVER: " + receive);
+            receive = AplicationState.recBuff.readUTF();
+            result = receive;
         }
-
+    return result;
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -77,7 +77,23 @@ public class ListSensor extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JFrame jFrame = new JFrame("List Sensor");
+        jFrame.setSize(600,500);
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        jFrame.addWindowListener (new WindowAdapter() {
+            public void windowClosing (WindowEvent e) {
+//                System.out.println("close");
+                try {
+                    AplicationState.connection.close();
+                    AplicationState.sentBuff.close();
+                    AplicationState.recBuff.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                jFrame.dispose();
+            }
+        });
         ArrayList<JButton> jButtons = new ArrayList<JButton>();
         ArrayList<String> macs = new ArrayList<String>();
         JSONObject myjson = new JSONObject(this.data);
@@ -85,35 +101,47 @@ public class ListSensor extends javax.swing.JFrame {
         int size = the_json_array.length();
         for (int i=0; i<size; i++) {
             String s = the_json_array.getString(i);
-
             JSONObject MACS = new JSONObject(s);
             String mac = MACS.getString("MAC");
             macs.add(mac);
             jButtons.add(new JButton(mac));
         }
-        setSize(600, 500);
-        setLayout(new GridLayout((size+1), 1, 5, 5));
-        JLabel jLabel = new JLabel("Example");
-        jLabel.setHorizontalAlignment(JLabel.CENTER);
-        add(jLabel);
-
+        JLabel jLabel = new JLabel("Cac thiet bi tren dia ban");
+        jLabel.setBounds(230,20,150,50);
+        jFrame.add(jLabel, BorderLayout.NORTH);
+       int x_chan = 80;
+       int y_chan = 80;
+       int x_le = 300;
+       int y_le = 80;
+       int y_value = 60;
         for(int i=0; i<jButtons.size(); i++) {
             String s = macs.get(i);
-            jButtons.get(i).setPreferredSize(new Dimension(40, 40));
+            jButtons.get(i).setHorizontalAlignment(SwingConstants.CENTER);
+            jFrame.add(jButtons.get(i), BorderLayout.CENTER);
+            if(i%2==0) {
+                y_chan = y_chan+y_value*(i/2);
+                jButtons.get(i).setBounds(x_chan,y_chan,170,50);
+            }
+            else {
+                y_le = y_le+y_value*(i/2);
+                jButtons.get(i).setBounds(x_le,y_le,170,50);
+            }
+
             jButtons.get(i).addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     try {
-                        sendMessage(s);
+                        String data = sendMessage(s);
+                        new SensorDetail(data).jFrame.setVisible(true);
+                        jFrame.dispose();
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             });
-            add(jButtons.get(i));
         }
-//        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
+        jFrame.setLayout(null);
+        jFrame.setVisible(true);
     }// </editor-fold>
 
     /**
@@ -144,12 +172,12 @@ public class ListSensor extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ListSensor().setVisible(true);
-            }
-        });
-//        new Test();
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new ListSensor().setVisible(true);
+//            }
+//        });
+        new ListSensor();
     }
 
     // Variables declaration - do not modify

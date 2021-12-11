@@ -7,6 +7,8 @@ package subscriber;
 
 import org.json.JSONObject;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -64,9 +66,7 @@ public class ListArea extends javax.swing.JFrame{
             System.out.println(jsonText);
             AplicationState.sentBuff.writeUTF(jsonText);
             receive = AplicationState.recBuff.readUTF();
-//            AplicationState.state = AplicationState.State.SELECT_SENSOR;
             result = receive;
-            System.out.println("FROM SERVER: " + receive);
         }
         return result;
     }
@@ -84,7 +84,19 @@ public class ListArea extends javax.swing.JFrame{
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-
+        addWindowListener (new WindowAdapter() {
+            public void windowClosing (WindowEvent e) {
+//                System.out.println("close");
+                try {
+                    AplicationState.connection.close();
+                    AplicationState.sentBuff.close();
+                    AplicationState.recBuff.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
         jButton1 = new javax.swing.JButton();
         buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
@@ -131,7 +143,11 @@ public class ListArea extends javax.swing.JFrame{
         });
         thanhxuan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                thanhxuanActionPerformed(evt);
+                try {
+                    thanhxuanActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -147,7 +163,11 @@ public class ListArea extends javax.swing.JFrame{
         });
         badinh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                badinhActionPerformed(evt);
+                try {
+                    badinhActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -163,7 +183,11 @@ public class ListArea extends javax.swing.JFrame{
         });
         hadong.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                hadongActionPerformed(evt);
+                try {
+                    hadongActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -209,28 +233,16 @@ public class ListArea extends javax.swing.JFrame{
         String location = "Cau Giay";
         String a = sendMessage(location);
         ListSensor listSensor = new ListSensor(a);
-        listSensor.setData(a);
-        listSensor.setVisible(true);
-        this.dispose();
+//        listSensor.setVisible(true);
         this.dispose();
     }
 
     private void caugiayMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
-//        String location = "Cau Giay";
-//        sendMessage(location);
-//        new ListSensor().setVisible(true);
-//        this.dispose();
-        // TODO add your handling code here:
+
     }
 
     private void thanhxuanMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
-        // TODO add your handling code here:
-        String location = "Thanh Xuan";
-        String a = sendMessage(location);
-        ListSensor listSensor = new ListSensor(a);
-        listSensor.setData(a);
-        listSensor.setVisible(true);
-        this.dispose();
+
     }
 
     private void badinhMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
@@ -238,7 +250,7 @@ public class ListArea extends javax.swing.JFrame{
         String a = sendMessage(location);
         ListSensor listSensor = new ListSensor(a);
         listSensor.setData(a);
-        listSensor.setVisible(true);
+//        listSensor.setVisible(true);
         this.dispose();
     }
 
@@ -248,20 +260,31 @@ public class ListArea extends javax.swing.JFrame{
         String a = sendMessage(location);
         ListSensor listSensor = new ListSensor(a);
         listSensor.setData(a);
-        listSensor.setVisible(true);
         this.dispose();
     }
 
-    private void thanhxuanActionPerformed(java.awt.event.ActionEvent evt) {
+    private void thanhxuanActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Thanh Xuan";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        this.dispose();
     }
 
-    private void badinhActionPerformed(java.awt.event.ActionEvent evt) {
+    private void badinhActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Ba Dinh";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        this.dispose();
     }
 
-    private void hadongActionPerformed(java.awt.event.ActionEvent evt) {
+    private void hadongActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Ha Dong";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        this.dispose();
     }
 
     /**
