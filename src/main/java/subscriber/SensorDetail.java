@@ -26,7 +26,7 @@ import javax.swing.*;
  * @author ADMIN
  */
 public class SensorDetail {
-    protected  String data;
+    public   String data;
     public String receive;
     public JFrame jFrame;
     public String MAC_Address;
@@ -52,24 +52,7 @@ public class SensorDetail {
         this.MAC_Address = MAC_Address;
         initComponents();
         System.out.println("1234"+AplicationState.state );
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    recMessage();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
     }
-
-//    public void recMessage() throws IOException {
-//        if (AplicationState.state == AplicationState.State.WAIT_DATA) {
-//            receive = AplicationState.recBuff.readUTF();
-//            System.out.println("FROM SERVER test: " + receive);
-//        }
-//    }
 
     public String recMessage() throws IOException {
         String result = "";
@@ -115,55 +98,59 @@ public class SensorDetail {
             AplicationState.sentBuff.writeUTF(jsonText);
             AplicationState.state = AplicationState.State.WAIT_DATA;
             receive = AplicationState.recBuff.readUTF();
-            this.data = receive;
-        }
-
-        ArrayList<String> datas = new ArrayList<String>();
-        ArrayList<String> temperature = new ArrayList<String>();
-        ArrayList<String> asdfl = new ArrayList<String>();
-        ArrayList<JLabel> jLabels = new ArrayList<JLabel>();
-        JSONObject myjson = new JSONObject(this.data);
-        JSONArray the_json_array = myjson.getJSONArray("data");
-        int size = the_json_array.length();
-        data_length = size;
-        for (int i=0; i<size; i++) {
-            String s = the_json_array.getString(i);
-            JSONObject MACS = new JSONObject(s);
-            datas.add(MACS.getString("data"));
-            temperature.add(MACS.getString("temperature"));
-            asdfl.add(MACS.getString("asdfl"));
-            JLabel jl = new JLabel();
-            jl.setText("<html>"+MACS.getString("data")+"<br>"+MACS.getString("temperature")+"<br>"+MACS.getString("asdfl"));
-            jLabels.add(jl);
-        }
-        JLabel jLabel = new JLabel("Du lieu cua thiet bi");
-        jLabel.setBounds(230,20,150,50);
-        jFrame.add(jLabel, BorderLayout.NORTH);
-
-//        int x_chan = 80;
-//        int y_chan = 80;
-//        int x_le = 300;
-//        int y_le = 80;
-//        int y_value = 80;
-        for(int i=0; i<jLabels.size(); i++) {
-            jLabels.get(i).setHorizontalAlignment(SwingConstants.CENTER);
-            jFrame.add(jLabels.get(i), BorderLayout.CENTER);
-            if(i%2==0) {
-                y_chan = y_chan+y_value*(i/2);
-                jLabels.get(i).setBounds(x_chan,y_chan,170,50);
+            if(receive.equals("{}")) {
+                data = "No data";
+                JLabel jLabel = new JLabel(data);
+                jLabel.setBounds(230,80,150,50);
+                jFrame.add(jLabel, BorderLayout.NORTH);
             }
             else {
-                y_le = y_le+y_value*(i/2);
-                jLabels.get(i).setBounds(x_le,y_le,170,50);
+                data = receive;
+                ArrayList<String> datas = new ArrayList<String>();
+                ArrayList<String> temperature = new ArrayList<String>();
+                ArrayList<String> asdfl = new ArrayList<String>();
+                ArrayList<JLabel> jLabels = new ArrayList<JLabel>();
+                JSONObject myjson = new JSONObject(this.data);
+                JSONArray the_json_array = myjson.getJSONArray("data");
+                int size = the_json_array.length();
+                System.out.println(size);
+                data_length = size;
+                for (int i=0; i<size; i++) {
+                    String s = the_json_array.getString(i);
+                    JSONObject MACS = new JSONObject(s);
+                    datas.add(MACS.getString("data"));
+                    temperature.add(MACS.getString("temperature"));
+                    asdfl.add(MACS.getString("asdfl"));
+                    JLabel jl = new JLabel();
+                    jl.setText("<html>"+MACS.getString("data")+"<br>"+MACS.getString("temperature")+"<br>"+MACS.getString("asdfl"));
+                    jLabels.add(jl);
+                }
+                JLabel jLabel = new JLabel("Du lieu cua thiet bi");
+                jLabel.setBounds(230,20,150,50);
+                jFrame.add(jLabel, BorderLayout.NORTH);
+                for(int i=0; i<jLabels.size(); i++) {
+                    jLabels.get(i).setHorizontalAlignment(SwingConstants.CENTER);
+                    jFrame.add(jLabels.get(i), BorderLayout.CENTER);
+                    if(i%2==0) {
+                        y_chan = y_chan+y_value*(i/2);
+                        jLabels.get(i).setBounds(x_chan,y_chan,170,50);
+                    }
+                    else {
+                        y_le = y_le+y_value*(i/2);
+                        jLabels.get(i).setBounds(x_le,y_le,170,50);
+                    }
+                }
             }
-        }
 
+            System.out.println("data " +receive);
+        }
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
                     try {
                         String s = recMessage();
+                        System.out.println(s);
                         JSONObject data_good_time = new JSONObject(s);
                         JLabel jl = new JLabel();
                         jl.setText("<html>"+data_good_time.getString("data")+"<br>"+data_good_time.getString("temperature")+"<br>"+data_good_time.getString("asdfl"));
@@ -181,6 +168,7 @@ public class SensorDetail {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    jFrame.setVisible(true);
                 }
             }
         });
@@ -197,20 +185,5 @@ public class SensorDetail {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) throws IOException {
-//        new Test();
 
-    }
-
-//    @Override
-//    public void run() {
-//        if (AplicationState.state == AplicationState.State.WAIT_DATA) {
-//            try {
-//                receive = AplicationState.recBuff.readUTF();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            System.out.println("FROM SERVER test: " + receive);
-//        }
-//    }
 }

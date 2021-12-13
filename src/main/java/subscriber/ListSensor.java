@@ -31,6 +31,7 @@ public class ListSensor {
     public final static int sensor = 0;
     public final static String MAC = "22:33:44:55:66:77";
     public String receive;
+    public JFrame frame;
     public void setData(String data) {
         this.data = data;
     }
@@ -96,11 +97,11 @@ public class ListSensor {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-        JFrame jFrame = new JFrame("List Sensor");
-        jFrame.setSize(600,500);
-        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame = new JFrame("List Sensor");
+        frame.setSize(600,500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        jFrame.addWindowListener (new WindowAdapter() {
+        frame.addWindowListener (new WindowAdapter() {
             public void windowClosing (WindowEvent e) {
 //                System.out.println("close");
                 try {
@@ -110,7 +111,7 @@ public class ListSensor {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-                jFrame.dispose();
+                frame.dispose();
             }
         });
         ArrayList<JButton> jButtons = new ArrayList<JButton>();
@@ -127,7 +128,7 @@ public class ListSensor {
         }
         JLabel jLabel = new JLabel("Cac thiet bi tren dia ban");
         jLabel.setBounds(230,20,150,50);
-        jFrame.add(jLabel, BorderLayout.NORTH);
+        frame.add(jLabel, BorderLayout.NORTH);
        int x_chan = 80;
        int y_chan = 80;
        int x_le = 300;
@@ -136,7 +137,7 @@ public class ListSensor {
         for(int i=0; i<jButtons.size(); i++) {
             String s = macs.get(i);
             jButtons.get(i).setHorizontalAlignment(SwingConstants.CENTER);
-            jFrame.add(jButtons.get(i), BorderLayout.CENTER);
+            frame.add(jButtons.get(i), BorderLayout.CENTER);
             if(i%2==0) {
                 y_chan = y_chan+y_value*(i/2);
                 jButtons.get(i).setBounds(x_chan,y_chan,170,50);
@@ -151,7 +152,7 @@ public class ListSensor {
                     try {
 //                        String data = sendMessage(s);
                         new Test(s).jFrame.setVisible(true);
-                        jFrame.dispose();
+                        frame.dispose();
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -159,47 +160,14 @@ public class ListSensor {
                 }
             });
         }
-        jFrame.setLayout(null);
-        jFrame.setVisible(true);
+        frame.setLayout(null);
+        frame.setVisible(true);
     }// </editor-fold>
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ListSensor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ListSensor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ListSensor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ListSensor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new ListSensor().setVisible(true);
-//            }
-//        });
-        new ListSensor();
-    }
 
-    // Variables declaration - do not modify
 
-    // End of variables declaration
 }
