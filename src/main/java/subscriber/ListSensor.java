@@ -53,21 +53,40 @@ public class ListSensor {
         initComponents();
     }
 
-    public String sendMessage(String MAC_Address) throws IOException {
-        String result = "";
-        if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
-            JSONObject obj = new JSONObject();
-            obj.put("MAC", MAC_Address);
-            String jsonText = obj.toString();
-            System.out.println(jsonText);
-            AplicationState.sentBuff.writeUTF(jsonText);
-            AplicationState.state = AplicationState.State.WAIT_DATA;
-            receive = AplicationState.recBuff.readUTF();
-            result = receive;
-        }
-    return result;
-    }
-
+//    public String sendMessage(String MAC_Address) throws IOException {
+//        String result = "";
+//        if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
+//            JSONObject obj = new JSONObject();
+//            obj.put("MAC", MAC_Address);
+//            String jsonText = obj.toString();
+//            System.out.println(jsonText);
+//            AplicationState.sentBuff.writeUTF(jsonText);
+//            AplicationState.state = AplicationState.State.WAIT_DATA;
+//            receive = AplicationState.recBuff.readUTF();
+//            result = receive;
+//        }
+//        return result;
+//    }
+//public void sendMessage(String MAC_Address) throws IOException {
+//    String result = "";
+//    if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
+//        JSONObject obj = new JSONObject();
+//        obj.put("MAC", MAC_Address);
+//        String jsonText = obj.toString();
+//        System.out.println(jsonText);
+//        AplicationState.sentBuff.writeUTF(jsonText);
+//        AplicationState.state = AplicationState.State.WAIT_DATA;
+//        receive = AplicationState.recBuff.readUTF();
+//        result = receive;
+//        if(receive == null) {
+//            System.out.println("No data");
+//        }
+//        else {
+//            System.out.println("ok");
+//        }
+//
+//    }
+//}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -130,8 +149,8 @@ public class ListSensor {
             jButtons.get(i).addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     try {
-                        String data = sendMessage(s);
-                        new SensorDetail(data).jFrame.setVisible(true);
+//                        String data = sendMessage(s);
+                        new Test(s).jFrame.setVisible(true);
                         jFrame.dispose();
 
                     } catch (IOException e) {

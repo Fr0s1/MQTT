@@ -26,10 +26,17 @@ import javax.swing.*;
  * @author ADMIN
  */
 public class SensorDetail {
-    protected String data;
+    protected  String data;
     public String receive;
     public JFrame jFrame;
-
+    public String MAC_Address;
+    public Thread thread;
+    int x_chan = 80;
+    int y_chan = 80;
+    int x_le = 300;
+    int y_le = 80;
+    int y_value = 80;
+    public int data_length;
     /**
      * Creates new form DataDetailSensor
      */
@@ -37,27 +44,41 @@ public class SensorDetail {
     public SensorDetail() throws IOException {
         System.out.println(AplicationState.state);
         initComponents();
-//        while(true) {
-//            senMessage();
-//        }
+
 
     }
 
-    public SensorDetail(String data) throws IOException {
-        this.data = data;
-        System.out.println("deail "+this.data);
-        System.out.println(AplicationState.state);
+    public SensorDetail(String MAC_Address) throws IOException {
+        this.MAC_Address = MAC_Address;
         initComponents();
-//        while(true) {
-//            senMessage();
-//        }
+        System.out.println("1234"+AplicationState.state );
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    recMessage();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
     }
 
-    public void senMessage() throws IOException {
+//    public void recMessage() throws IOException {
+//        if (AplicationState.state == AplicationState.State.WAIT_DATA) {
+//            receive = AplicationState.recBuff.readUTF();
+//            System.out.println("FROM SERVER test: " + receive);
+//        }
+//    }
+
+    public String recMessage() throws IOException {
+        String result = "";
         if (AplicationState.state == AplicationState.State.WAIT_DATA) {
             receive = AplicationState.recBuff.readUTF();
-            System.out.println("FROM SERVER test: " + receive);
+            result = receive;
         }
+
+        return result;
     }
 
     /**
@@ -80,10 +101,22 @@ public class SensorDetail {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+                thread.stop();
                 jFrame.dispose();
+
             }
         });
 
+        if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
+            JSONObject obj = new JSONObject();
+            obj.put("MAC", MAC_Address);
+            String jsonText = obj.toString();
+            System.out.println("abcd"+jsonText);
+            AplicationState.sentBuff.writeUTF(jsonText);
+            AplicationState.state = AplicationState.State.WAIT_DATA;
+            receive = AplicationState.recBuff.readUTF();
+            this.data = receive;
+        }
 
         ArrayList<String> datas = new ArrayList<String>();
         ArrayList<String> temperature = new ArrayList<String>();
@@ -91,8 +124,8 @@ public class SensorDetail {
         ArrayList<JLabel> jLabels = new ArrayList<JLabel>();
         JSONObject myjson = new JSONObject(this.data);
         JSONArray the_json_array = myjson.getJSONArray("data");
-        System.out.println(the_json_array);
         int size = the_json_array.length();
+        data_length = size;
         for (int i=0; i<size; i++) {
             String s = the_json_array.getString(i);
             JSONObject MACS = new JSONObject(s);
@@ -107,13 +140,12 @@ public class SensorDetail {
         jLabel.setBounds(230,20,150,50);
         jFrame.add(jLabel, BorderLayout.NORTH);
 
-        int x_chan = 80;
-        int y_chan = 80;
-        int x_le = 300;
-        int y_le = 80;
-        int y_value = 80;
+//        int x_chan = 80;
+//        int y_chan = 80;
+//        int x_le = 300;
+//        int y_le = 80;
+//        int y_value = 80;
         for(int i=0; i<jLabels.size(); i++) {
-//            String s = macs.get(i);
             jLabels.get(i).setHorizontalAlignment(SwingConstants.CENTER);
             jFrame.add(jLabels.get(i), BorderLayout.CENTER);
             if(i%2==0) {
@@ -125,17 +157,60 @@ public class SensorDetail {
                 jLabels.get(i).setBounds(x_le,y_le,170,50);
             }
         }
+
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        String s = recMessage();
+                        JSONObject data_good_time = new JSONObject(s);
+                        JLabel jl = new JLabel();
+                        jl.setText("<html>"+data_good_time.getString("data")+"<br>"+data_good_time.getString("temperature")+"<br>"+data_good_time.getString("asdfl"));
+                        jl.setHorizontalAlignment(SwingConstants.CENTER);
+                        jFrame.add(jl, BorderLayout.CENTER);
+                        if(data_length%2==0) {
+                            y_chan = y_chan+y_value*(data_length/2);
+                            jl.setBounds(x_chan,y_chan,170,50);
+                        }
+                        else {
+                            y_le = y_le+y_value*(data_length/2);
+                            jl.setBounds(x_le,y_le,170,50);
+                        }
+                        data_length++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+
         jFrame.setLayout(null);
         jFrame.setVisible(true);
 
+
     }// </editor-fold>
+
+
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) throws IOException {
-        new SensorDetail();
+//        new Test();
 
     }
 
+//    @Override
+//    public void run() {
+//        if (AplicationState.state == AplicationState.State.WAIT_DATA) {
+//            try {
+//                receive = AplicationState.recBuff.readUTF();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("FROM SERVER test: " + receive);
+//        }
+//    }
 }
