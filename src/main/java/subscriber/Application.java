@@ -21,6 +21,7 @@ public class Application {
     public static void main(String[] args) {
         String receive;
         Scanner sc = new Scanner(System.in);
+
         String sent;
 
         try {
@@ -28,8 +29,6 @@ public class Application {
             DataOutputStream sentBuff = new DataOutputStream(connection.getOutputStream());
             DataInputStream recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
             State state = State.HANDSHAKE;
-
-
             while (true) {
                 if (state == State.HANDSHAKE) {
                     JSONObject jo = new JSONObject();
@@ -57,8 +56,6 @@ public class Application {
 
                     state = State.WAIT_DATA;
                 }
-
-
                 receive = recBuff.readUTF();
 
                 System.out.println("FROM SERVER: " + receive);

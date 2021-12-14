@@ -1,0 +1,34 @@
+[
+    {
+    "Air Temperature": 111,
+    "Wet Bulb Temperature": 7,
+    "Humidity": 55,
+    "Rain Intensity": 0,
+    "Interval Rain": 0,
+    "Total Rain": 1.4,
+    "Precipitation Type": 0,
+    "Wind Direction": 63,
+    "Wind Speed": 1.9,
+    "Maximum Wind Speed": 2.8,
+    "Barometric Pressure": "",
+    "Solar Radiation": 780,
+    "Heading": 322,
+    "Battery Life": 2
+    },
+    {
+        "Air Temperature": 111,
+        "Wet Bulb Temperature": 7,
+        "Humidity": 55,
+        "Rain Intensity": 0,
+        "Interval Rain": 0,
+        "Total Rain": 1.4,
+        "Precipitation Type": 0,
+        "Wind Direction": 63,
+        "Wind Speed": 1.9,
+        "Maximum Wind Speed": 2.8,
+        "Barometric Pressure": "",
+        "Solar Radiation": 780,
+        "Heading": 322,
+        "Battery Life": 2
+    }
+]
