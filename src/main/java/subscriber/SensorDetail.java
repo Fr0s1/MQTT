@@ -31,11 +31,13 @@ public class SensorDetail {
     public JFrame jFrame;
     public String MAC_Address;
     public Thread thread;
-    int x_chan = 80;
-    int y_chan = 80;
-    int x_le = 300;
-    int y_le = 80;
-    int y_value = 80;
+    int x_1 = 80;
+    int y_1 = 80;
+    int x_2 = 300;
+    int y_2 = 80;
+    int y_value = 120;
+    int x_3 = 600;
+    int y_3 = 80;
     public int data_length;
     /**
      * Creates new form DataDetailSensor
@@ -51,7 +53,6 @@ public class SensorDetail {
     public SensorDetail(String MAC_Address) throws IOException {
         this.MAC_Address = MAC_Address;
         initComponents();
-        System.out.println("1234"+AplicationState.state );
     }
 
     public String recMessage() throws IOException {
@@ -73,7 +74,7 @@ public class SensorDetail {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() throws IOException {
         jFrame = new JFrame("Sensor Detail");
-        jFrame.setSize(600,500);
+        jFrame.setSize(950,1000);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.addWindowListener (new WindowAdapter() {
             public void windowClosing (WindowEvent e) {
@@ -106,11 +107,9 @@ public class SensorDetail {
             }
             else {
                 data = receive;
-                ArrayList<String> datas = new ArrayList<String>();
-                ArrayList<String> temperature = new ArrayList<String>();
-                ArrayList<String> asdfl = new ArrayList<String>();
                 ArrayList<JLabel> jLabels = new ArrayList<JLabel>();
-                JSONObject myjson = new JSONObject(this.data);
+                JSONObject myjson = new JSONObject(data);
+                System.out.println(myjson);
                 JSONArray the_json_array = myjson.getJSONArray("data");
                 int size = the_json_array.length();
                 System.out.println(size);
@@ -118,11 +117,15 @@ public class SensorDetail {
                 for (int i=0; i<size; i++) {
                     String s = the_json_array.getString(i);
                     JSONObject MACS = new JSONObject(s);
-                    datas.add(MACS.getString("data"));
-                    temperature.add(MACS.getString("temperature"));
-                    asdfl.add(MACS.getString("asdfl"));
                     JLabel jl = new JLabel();
-                    jl.setText("<html>"+MACS.getString("data")+"<br>"+MACS.getString("temperature")+"<br>"+MACS.getString("asdfl"));
+                    jl.setText("<html>"+"Wet bult Temperature: "+MACS.getString("Wet bult Temperature")+"<br>"+
+                            "Humidity: "+MACS.getString("Humidity")+"<br>"+
+                            "Wind Direction: "+MACS.getString("Wind Direction")+"<br>"+
+                            "Wind Speed: "+MACS.getString("Wind Speed")+"<br>"+
+                            "Maximum Wind Speed: "+MACS.getString("Maximum Wind Speed")+"<br>"+
+                            "Solar Radiation: "+MACS.getString("Solar Radiation")+"<br"+
+                            "Timestamp: "+MACS.getString("Timestamp")
+                    );
                     jLabels.add(jl);
                 }
                 JLabel jLabel = new JLabel("Du lieu cua thiet bi");
@@ -131,19 +134,26 @@ public class SensorDetail {
                 for(int i=0; i<jLabels.size(); i++) {
                     jLabels.get(i).setHorizontalAlignment(SwingConstants.CENTER);
                     jFrame.add(jLabels.get(i), BorderLayout.CENTER);
-                    if(i%2==0) {
-                        y_chan = y_chan+y_value*(i/2);
-                        jLabels.get(i).setBounds(x_chan,y_chan,170,50);
+                    if(i%3==0) {
+                        y_1 = y_1+y_value*(i/3);
+                        jLabels.get(i).setBounds(x_1,y_1,170,110);
+                    }
+                    else if(i%3==1) {
+                        y_2 = y_2+y_value*(i/3);
+                        jLabels.get(i).setBounds(x_2,y_2,170,110);
                     }
                     else {
-                        y_le = y_le+y_value*(i/2);
-                        jLabels.get(i).setBounds(x_le,y_le,170,50);
+                        y_3 = y_3+y_value*(i/3);
+                        jLabels.get(i).setBounds(x_3,y_3,170,110);
                     }
                 }
             }
 
             System.out.println("data " +receive);
         }
+
+
+
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -153,16 +163,27 @@ public class SensorDetail {
                         System.out.println(s);
                         JSONObject data_good_time = new JSONObject(s);
                         JLabel jl = new JLabel();
-                        jl.setText("<html>"+data_good_time.getString("data")+"<br>"+data_good_time.getString("temperature")+"<br>"+data_good_time.getString("asdfl"));
+                        jl.setText("<html>"+"Wet bult Temperature: "+data_good_time.getString("Wet bult Temperature")+"<br>"+
+                                "Humidity: "+data_good_time.getString("Humidity")+"<br>"+
+                                "Wind Direction: "+data_good_time.getString("Wind Direction")+"<br>"+
+                                "Wind Speed: "+data_good_time.getString("Wind Speed")+"<br>"+
+                                "Maximum Wind Speed: "+data_good_time.getString("Maximum Wind Speed")+"<br>"+
+                                "Solar Radiation: "+data_good_time.getString("Solar Radiation")+"<br>"+
+                                "Timestamp: "+data_good_time.getString("Timestamp")
+                        );
                         jl.setHorizontalAlignment(SwingConstants.CENTER);
                         jFrame.add(jl, BorderLayout.CENTER);
-                        if(data_length%2==0) {
-                            y_chan = y_chan+y_value*(data_length/2);
-                            jl.setBounds(x_chan,y_chan,170,50);
+                        if(data_length%3==0) {
+                            y_1 = y_1+y_value*(data_length/3);
+                            jl.setBounds(x_1,y_1,170,110);
+                        }
+                        else if(data_length%3==1) {
+                            y_2 = y_2+y_value*(data_length/3);
+                            jl.setBounds(x_2,y_2,170,110);
                         }
                         else {
-                            y_le = y_le+y_value*(data_length/2);
-                            jl.setBounds(x_le,y_le,170,50);
+                            y_3 = y_3+y_value*(data_length/3);
+                            jl.setBounds(x_3,y_3,170,110);
                         }
                         data_length++;
                     } catch (IOException e) {
