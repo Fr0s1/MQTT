@@ -98,7 +98,7 @@ public class ListSensor {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
         frame = new JFrame("List Sensor");
-        frame.setSize(600,500);
+        frame.setSize(600,1000);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.addWindowListener (new WindowAdapter() {
