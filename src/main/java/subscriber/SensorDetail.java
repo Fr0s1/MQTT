@@ -14,7 +14,9 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 
+import org.bson.json.JsonObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import subscriber.AplicationState;
@@ -33,10 +35,10 @@ public class SensorDetail {
     public Thread thread;
     int x_1 = 80;
     int y_1 = 80;
-    int x_2 = 300;
+    int x_2 = 410;
     int y_2 = 80;
-    int y_value = 120;
-    int x_3 = 600;
+    int y_value = 180;
+    int x_3 = 730;
     int y_3 = 80;
     public int data_length;
     /**
@@ -73,8 +75,9 @@ public class SensorDetail {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() throws IOException {
+
         jFrame = new JFrame("Sensor Detail");
-        jFrame.setSize(950,1000);
+        jFrame.setSize(1000,1000);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.addWindowListener (new WindowAdapter() {
             public void windowClosing (WindowEvent e) {
@@ -91,65 +94,68 @@ public class SensorDetail {
             }
         });
 
+        JLabel jLabel_header = new JLabel("Du lieu cua thiet bi");
+        jLabel_header.setBounds(500,20,150,50);
+        jFrame.add(jLabel_header, BorderLayout.NORTH);
+        JLabel jLabel_no_data = new JLabel();
         if (AplicationState.state == AplicationState.State.SELECT_SENSOR) {
             JSONObject obj = new JSONObject();
             obj.put("MAC", MAC_Address);
             String jsonText = obj.toString();
-            System.out.println("abcd"+jsonText);
             AplicationState.sentBuff.writeUTF(jsonText);
             AplicationState.state = AplicationState.State.WAIT_DATA;
             receive = AplicationState.recBuff.readUTF();
             if(receive.equals("{}")) {
                 data = "No data";
-                JLabel jLabel = new JLabel(data);
-                jLabel.setBounds(230,80,150,50);
-                jFrame.add(jLabel, BorderLayout.NORTH);
+//                JLabel jLabel_no_data = new JLabel(data);
+                jLabel_no_data.setText(data);
+                jLabel_no_data.setBounds(500,80,150,50);
+                jFrame.add(jLabel_no_data, BorderLayout.NORTH);
             }
             else {
+
+//                Container parent = jLabel_no_data.getParent();
+//                parent.remove(jLabel_no_data);
+//                parent.validate();
+//                parent.repaint();
                 data = receive;
                 ArrayList<JLabel> jLabels = new ArrayList<JLabel>();
                 JSONObject myjson = new JSONObject(data);
-                System.out.println(myjson);
                 JSONArray the_json_array = myjson.getJSONArray("data");
                 int size = the_json_array.length();
-                System.out.println(size);
                 data_length = size;
                 for (int i=0; i<size; i++) {
                     String s = the_json_array.getString(i);
                     JSONObject MACS = new JSONObject(s);
+                    Iterator<String> keys = MACS.keys();
                     JLabel jl = new JLabel();
-                    jl.setText("<html>"+"Wet bult Temperature: "+MACS.getString("Wet bult Temperature")+"<br>"+
-                            "Humidity: "+MACS.getString("Humidity")+"<br>"+
-                            "Wind Direction: "+MACS.getString("Wind Direction")+"<br>"+
-                            "Wind Speed: "+MACS.getString("Wind Speed")+"<br>"+
-                            "Maximum Wind Speed: "+MACS.getString("Maximum Wind Speed")+"<br>"+
-                            "Solar Radiation: "+MACS.getString("Solar Radiation")+"<br"+
-                            "Timestamp: "+MACS.getString("Timestamp")
-                    );
+                    String textLabel = "<html>";
+                    for(String key : MACS.keySet()) {
+                        textLabel += key + " :" + MACS.getString(key) + "<br>";
+                        System.out.println(textLabel);
+                    }
+                    jl.setText(textLabel);
                     jLabels.add(jl);
                 }
-                JLabel jLabel = new JLabel("Du lieu cua thiet bi");
-                jLabel.setBounds(230,20,150,50);
-                jFrame.add(jLabel, BorderLayout.NORTH);
+
                 for(int i=0; i<jLabels.size(); i++) {
                     jLabels.get(i).setHorizontalAlignment(SwingConstants.CENTER);
                     jFrame.add(jLabels.get(i), BorderLayout.CENTER);
                     if(i%3==0) {
                         y_1 = y_1+y_value*(i/3);
-                        jLabels.get(i).setBounds(x_1,y_1,170,110);
+                        jLabels.get(i).setBounds(x_1,y_1,240,180);
                     }
                     else if(i%3==1) {
                         y_2 = y_2+y_value*(i/3);
-                        jLabels.get(i).setBounds(x_2,y_2,170,110);
+                        jLabels.get(i).setBounds(x_2,y_2,240,180);
                     }
                     else {
                         y_3 = y_3+y_value*(i/3);
-                        jLabels.get(i).setBounds(x_3,y_3,170,110);
+                        jLabels.get(i).setBounds(x_3,y_3,240,180);
                     }
                 }
             }
 
-            System.out.println("data " +receive);
         }
 
 
@@ -157,33 +163,36 @@ public class SensorDetail {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+//                jFrame.remove(jLabel_no_data);
+//                jFrame.repaint();
                 while (true) {
                     try {
                         String s = recMessage();
                         System.out.println(s);
+                        jFrame.remove(jLabel_no_data);
+                        jFrame.repaint();
                         JSONObject data_good_time = new JSONObject(s);
                         JLabel jl = new JLabel();
-                        jl.setText("<html>"+"Wet bult Temperature: "+data_good_time.getString("Wet bult Temperature")+"<br>"+
-                                "Humidity: "+data_good_time.getString("Humidity")+"<br>"+
-                                "Wind Direction: "+data_good_time.getString("Wind Direction")+"<br>"+
-                                "Wind Speed: "+data_good_time.getString("Wind Speed")+"<br>"+
-                                "Maximum Wind Speed: "+data_good_time.getString("Maximum Wind Speed")+"<br>"+
-                                "Solar Radiation: "+data_good_time.getString("Solar Radiation")+"<br>"+
-                                "Timestamp: "+data_good_time.getString("Timestamp")
-                        );
+
                         jl.setHorizontalAlignment(SwingConstants.CENTER);
+                        String textLabel_goo_time = "<html>";
+                        for(String key : data_good_time.keySet()) {
+                            textLabel_goo_time += key + " :" + data_good_time.getString(key) + "<br>";
+                            System.out.println(textLabel_goo_time);
+                        }
+                        jl.setText(textLabel_goo_time);
                         jFrame.add(jl, BorderLayout.CENTER);
                         if(data_length%3==0) {
                             y_1 = y_1+y_value*(data_length/3);
-                            jl.setBounds(x_1,y_1,170,110);
+                            jl.setBounds(x_1,y_1,240,180);
                         }
                         else if(data_length%3==1) {
                             y_2 = y_2+y_value*(data_length/3);
-                            jl.setBounds(x_2,y_2,170,110);
+                            jl.setBounds(x_2,y_2,240,180);
                         }
                         else {
                             y_3 = y_3+y_value*(data_length/3);
-                            jl.setBounds(x_3,y_3,170,110);
+                            jl.setBounds(x_3,y_3,240,180);
                         }
                         data_length++;
                     } catch (IOException e) {
