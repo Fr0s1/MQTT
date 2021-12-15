@@ -29,11 +29,7 @@ public class Sensor {
         Scanner sc = new Scanner(System.in);
         System.out.print("Input from client - location: ");
         String location = sc.nextLine();
-//        System.out.print("Input from client - HOSTNAME: ");
-//        String HOSTNAME = sc.nextLine();
-//        System.out.print("Input from client - PORT: ");
-//        int PORT = sc.nextInt();
-//        sc.nextLine();
+
         State state = State.HANDSHAKE;
 
         try {
