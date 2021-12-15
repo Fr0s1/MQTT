@@ -16,7 +16,7 @@ public class ServerAPI {
     static MongoClient mongoClient = MongoClients.create(mongodb_uri);
     static MongoDatabase database = mongoClient.getDatabase(mongodb_database);
 
-    static String getDevicesByDistrict(String district) {
+    static String getDevicesByLocation(String district) {
         MongoCollection devices = database.getCollection("devices");
         Bson projectionFields = Projections.fields(
                 Projections.include("type", "MAC"),

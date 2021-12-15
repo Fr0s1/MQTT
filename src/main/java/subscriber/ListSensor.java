@@ -26,11 +26,7 @@ import subscriber.AplicationState;
  * @author ADMIN
  */
 public class ListSensor {
-    //   protected ListArea listArea;
     protected String data;
-    public final static int sensor = 0;
-    public final static String MAC = "22:33:44:55:66:77";
-    public String receive;
     public JFrame frame;
     public void setData(String data) {
         this.data = data;
@@ -43,11 +39,6 @@ public class ListSensor {
     /**
      * Creates new form ListSensor
      */
-    public ListSensor() {
-        AplicationState.state = AplicationState.State.SELECT_SENSOR;
-        initComponents();
-    }
-
     public ListSensor(String data)  {
         this.data = data;
         AplicationState.state = AplicationState.State.SELECT_SENSOR;
@@ -55,7 +46,6 @@ public class ListSensor {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
         frame = new JFrame("List Sensor");
         frame.setSize(600,1000);
@@ -63,7 +53,6 @@ public class ListSensor {
 
         frame.addWindowListener (new WindowAdapter() {
             public void windowClosing (WindowEvent e) {
-//                System.out.println("close");
                 try {
                     AplicationState.connection.close();
                     AplicationState.sentBuff.close();
@@ -75,43 +64,43 @@ public class ListSensor {
             }
         });
         ArrayList<JButton> jButtons = new ArrayList<JButton>();
-        ArrayList<String> macs = new ArrayList<String>();
-        JSONObject myjson = new JSONObject(this.data);
-        JSONArray the_json_array = myjson.getJSONArray("devices");
-        int size = the_json_array.length();
+        ArrayList<String> mac_addresses = new ArrayList<String>();
+        JSONObject sensor_list_data = new JSONObject(this.data);
+        JSONArray sensors = sensor_list_data.getJSONArray("devices");
+        int size = sensors.length();
         for (int i=0; i<size; i++) {
-            String s = the_json_array.getString(i);
+            String s = sensors.getString(i);
             JSONObject MACS = new JSONObject(s);
             String mac = MACS.getString("MAC");
-            macs.add(mac);
+            mac_addresses.add(mac);
             jButtons.add(new JButton(mac));
         }
         JLabel jLabel = new JLabel("Cac thiet bi tren dia ban");
         jLabel.setBounds(230,20,150,50);
         frame.add(jLabel, BorderLayout.NORTH);
-       int x_chan = 80;
-       int y_chan = 80;
-       int x_le = 300;
-       int y_le = 80;
+       int  x_even = 80;
+       int y_even= 80;
+       int x_odd = 300;
+       int y_odd = 80;
        int y_value = 60;
         for(int i=0; i<jButtons.size(); i++) {
-            String s = macs.get(i);
+            String mac_address = mac_addresses.get(i);
             jButtons.get(i).setHorizontalAlignment(SwingConstants.CENTER);
             frame.add(jButtons.get(i), BorderLayout.CENTER);
             if(i%2==0) {
-                y_chan = y_chan+y_value*(i/2);
-                jButtons.get(i).setBounds(x_chan,y_chan,170,50);
+                y_even = y_even+y_value*(i/2);
+                jButtons.get(i).setBounds(x_even,y_even,170,50);
             }
             else {
-                y_le = y_le+y_value*(i/2);
-                jButtons.get(i).setBounds(x_le,y_le,170,50);
+                y_odd = y_odd+y_value*(i/2);
+                jButtons.get(i).setBounds(x_odd,y_odd,170,50);
             }
 
             jButtons.get(i).addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     try {
 //                        String data = sendMessage(s);
-                        new Test(s).jFrame.setVisible(true);
+                        new SensorDetail(mac_address).jFrame.setVisible(true);
                         frame.dispose();
 
                     } catch (IOException e) {

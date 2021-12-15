@@ -30,16 +30,16 @@ import javax.swing.*;
 public class SensorDetail {
     public   String data;
     public String receive;
-    public JFrame jFrame;
+    public JFrame jFrame; // bien cua javaswing
     public String MAC_Address;
-    public Thread thread;
-    int x_1 = 80;
-    int y_1 = 80;
-    int x_2 = 410;
-    int y_2 = 80;
-    int y_value = 180;
-    int x_3 = 730;
-    int y_3 = 80;
+    public Thread thread;  // bien cua luong moi
+    int x_1 = 80; // toa do x cua label du lieu cot dau tien
+    int y_1 = 80; // toa do y cua label du lieu cot dau tien
+    int x_2 = 410; // toa do x cua label du lieu cot thu 2
+    int y_2 = 80;  // toa do y cua label du lieu cot thu 2
+    int y_value = 360;
+    int x_3 = 730;  // toa do x cua label du lieu cot thu 3
+    int y_3 = 80;  //toa do y cua label du lieu cot thu 3
     public int data_length;
     /**
      * Creates new form DataDetailSensor
@@ -48,8 +48,6 @@ public class SensorDetail {
     public SensorDetail() throws IOException {
         System.out.println(AplicationState.state);
         initComponents();
-
-
     }
 
     public SensorDetail(String MAC_Address) throws IOException {
@@ -57,6 +55,7 @@ public class SensorDetail {
         initComponents();
     }
 
+    // doc du lieu tu socket
     public String recMessage() throws IOException {
         String result = "";
         if (AplicationState.state == AplicationState.State.WAIT_DATA) {
@@ -107,31 +106,24 @@ public class SensorDetail {
             receive = AplicationState.recBuff.readUTF();
             if(receive.equals("{}")) {
                 data = "No data";
-//                JLabel jLabel_no_data = new JLabel(data);
                 jLabel_no_data.setText(data);
                 jLabel_no_data.setBounds(500,80,150,50);
                 jFrame.add(jLabel_no_data, BorderLayout.NORTH);
             }
             else {
-
-//                Container parent = jLabel_no_data.getParent();
-//                parent.remove(jLabel_no_data);
-//                parent.validate();
-//                parent.repaint();
                 data = receive;
                 ArrayList<JLabel> jLabels = new ArrayList<JLabel>();
-                JSONObject myjson = new JSONObject(data);
-                JSONArray the_json_array = myjson.getJSONArray("data");
-                int size = the_json_array.length();
+                JSONObject latestDatabaseData = new JSONObject(data);
+                JSONArray latestDatabaseDataArray = latestDatabaseData.getJSONArray("data");
+                int size = latestDatabaseDataArray.length();
                 data_length = size;
                 for (int i=0; i<size; i++) {
-                    String s = the_json_array.getString(i);
-                    JSONObject MACS = new JSONObject(s);
-                    Iterator<String> keys = MACS.keys();
+                    String latestDatabaseDataString = latestDatabaseDataArray.getString(i);
+                    JSONObject real_time_data = new JSONObject(latestDatabaseDataString);
                     JLabel jl = new JLabel();
                     String textLabel = "<html>";
-                    for(String key : MACS.keySet()) {
-                        textLabel += key + " :" + MACS.getString(key) + "<br>";
+                    for(String key : real_time_data.keySet()) {
+                        textLabel += key + " :" + String.valueOf(real_time_data.get(key)) + "<br>";
                         System.out.println(textLabel);
                     }
                     jl.setText(textLabel);
@@ -143,15 +135,15 @@ public class SensorDetail {
                     jFrame.add(jLabels.get(i), BorderLayout.CENTER);
                     if(i%3==0) {
                         y_1 = y_1+y_value*(i/3);
-                        jLabels.get(i).setBounds(x_1,y_1,240,180);
+                        jLabels.get(i).setBounds(x_1,y_1,240,350);
                     }
                     else if(i%3==1) {
                         y_2 = y_2+y_value*(i/3);
-                        jLabels.get(i).setBounds(x_2,y_2,240,180);
+                        jLabels.get(i).setBounds(x_2,y_2,240,350);
                     }
                     else {
                         y_3 = y_3+y_value*(i/3);
-                        jLabels.get(i).setBounds(x_3,y_3,240,180);
+                        jLabels.get(i).setBounds(x_3,y_3,240,350);
                     }
                 }
             }
@@ -163,36 +155,34 @@ public class SensorDetail {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-//                jFrame.remove(jLabel_no_data);
-//                jFrame.repaint();
                 while (true) {
                     try {
-                        String s = recMessage();
-                        System.out.println(s);
+                        String receivedData = recMessage();
+                        System.out.println(receivedData);
                         jFrame.remove(jLabel_no_data);
                         jFrame.repaint();
-                        JSONObject data_good_time = new JSONObject(s);
+                        JSONObject receivedDataJsonObj= new JSONObject(receivedData);
                         JLabel jl = new JLabel();
 
                         jl.setHorizontalAlignment(SwingConstants.CENTER);
-                        String textLabel_goo_time = "<html>";
-                        for(String key : data_good_time.keySet()) {
-                            textLabel_goo_time += key + " :" + data_good_time.getString(key) + "<br>";
-                            System.out.println(textLabel_goo_time);
+                        String textLabel_real_time = "<html>";
+                        for(String key : receivedDataJsonObj.keySet()) {
+                            textLabel_real_time += key + " :" + String.valueOf(receivedDataJsonObj.get(key)) + "<br>";
+                            System.out.println(textLabel_real_time);
                         }
-                        jl.setText(textLabel_goo_time);
+                        jl.setText(textLabel_real_time);
                         jFrame.add(jl, BorderLayout.CENTER);
                         if(data_length%3==0) {
                             y_1 = y_1+y_value*(data_length/3);
-                            jl.setBounds(x_1,y_1,240,180);
+                            jl.setBounds(x_1,y_1,240,350);
                         }
                         else if(data_length%3==1) {
                             y_2 = y_2+y_value*(data_length/3);
-                            jl.setBounds(x_2,y_2,240,180);
+                            jl.setBounds(x_2,y_2,240,350);
                         }
                         else {
                             y_3 = y_3+y_value*(data_length/3);
-                            jl.setBounds(x_3,y_3,240,180);
+                            jl.setBounds(x_3,y_3,240,350);
                         }
                         data_length++;
                     } catch (IOException e) {
