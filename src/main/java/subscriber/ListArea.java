@@ -7,50 +7,43 @@ package subscriber;
 
 import org.json.JSONObject;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.Socket;
+import java.util.concurrent.ThreadLocalRandom;
 
+import subscriber.AplicationState;
 /**
  * @author ADMIN
  */
-public class ListArea extends javax.swing.JFrame {
+public class ListArea extends javax.swing.JFrame{
 
     /**
      * Creates new form NewJFrame
      */
     public static String HOSTNAME = "localhost";
     public static int PORT = 8080;
-    public Socket connection;
-    public DataOutputStream sentBuff;
-    public DataInputStream recBuff;
     public final static int sensor = 0;
-    public final static String MAC = "22:33:44:55:66:77";
-    public ListArea.State state = State.HANDSHAKE;
+    public String[] MAC = {"84:64:20:46:32:fe", "44:29:06:e1:e1:07", "d5:95:45:8c:95:de", "af:ad:42:69:98:a6", "4e:a8:51:59:85:61",
+            "1b:8c:47:f2:fc:d9", "d5:2a:2f:e2:62:28", "f9:27:18:8a:ae:06", "5d:0f:e0:dd:82:3b", "81:c0:bf:73:79:3f"};
     public String receive;
-
-    enum State {
-        HANDSHAKE,
-        GET_SENSORS,
-        SELECT_SENSOR,
-        WAIT_DATA,
-    }
+    public String sendDatatoListSensor;
 
     public ListArea() {
 
         try {
-            connection = new Socket(HOSTNAME, PORT);
-            sentBuff = new DataOutputStream(connection.getOutputStream());
-            recBuff = new DataInputStream(new BufferedInputStream(connection.getInputStream()));
-
+            int index = ThreadLocalRandom.current().nextInt(0, 9+1);
             JSONObject jo = new JSONObject();
             jo.put("sensor", sensor);
-            jo.put("MAC", MAC);
-            sentBuff.writeUTF(jo.toString());
-            this.state = State.GET_SENSORS;
-            receive = recBuff.readUTF();
+            jo.put("MAC", MAC[index]);
+            AplicationState.sentBuff.writeUTF(jo.toString());
+            receive = AplicationState.recBuff.readUTF();
+            AplicationState.state = AplicationState.State.GET_SENSORS;
             System.out.println("FROM SERVER: " + receive);
         } catch (IOException ex) {
             System.err.println(ex);
@@ -59,32 +52,26 @@ public class ListArea extends javax.swing.JFrame {
         initComponents();
     }
 
-    public void sendMessage(String location) throws IOException {
-//        if(state == ListArea.State.HANDSHAKE) {
-//            JSONObject jo = new JSONObject();
-//            jo.put("sensor", sensor);
-//            jo.put("MAC", MAC);
-//            sentBuff.writeUTF(jo.toString());
-//            state = ListArea.State.GET_SENSORS;
-//        } else {
-//            JSONObject obj = new JSONObject();
-//            obj.put("location", location);
-//            String jsonText = obj.toString();
-//            System.out.println(jsonText);
-//            sentBuff.writeUTF(jsonText);
-//            receive = recBuff.readUTF();
-//            System.out.println("FROM SERVER: " + receive);
-//        }
-        if (this.state == State.GET_SENSORS) {
+    public String getSendDatatoListSensor() {
+        return sendDatatoListSensor;
+    }
+    public String sendMessage(String location) throws IOException {
+        String result = "";
+        if (AplicationState.state == AplicationState.State.GET_SENSORS) {
             JSONObject obj = new JSONObject();
             obj.put("location", location);
             String jsonText = obj.toString();
             System.out.println(jsonText);
-            sentBuff.writeUTF(jsonText);
-            receive = recBuff.readUTF();
-            System.out.println("FROM SERVER: " + receive);
-
+            AplicationState.sentBuff.writeUTF(jsonText);
+            receive = AplicationState.recBuff.readUTF();
+            result = receive;
         }
+        return result;
+    }
+
+
+    public String sendData(String s) {
+        return s;
     }
 
     /**
@@ -95,7 +82,19 @@ public class ListArea extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-
+        addWindowListener (new WindowAdapter() {
+            public void windowClosing (WindowEvent e) {
+//                System.out.println("close");
+                try {
+                    AplicationState.connection.close();
+                    AplicationState.sentBuff.close();
+                    AplicationState.recBuff.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
         jButton1 = new javax.swing.JButton();
         buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
@@ -122,7 +121,11 @@ public class ListArea extends javax.swing.JFrame {
         });
         caugiay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                caugiayActionPerformed(evt);
+                try {
+                    caugiayActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -138,7 +141,11 @@ public class ListArea extends javax.swing.JFrame {
         });
         thanhxuan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                thanhxuanActionPerformed(evt);
+                try {
+                    thanhxuanActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -154,7 +161,11 @@ public class ListArea extends javax.swing.JFrame {
         });
         badinh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                badinhActionPerformed(evt);
+                try {
+                    badinhActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -170,7 +181,11 @@ public class ListArea extends javax.swing.JFrame {
         });
         hadong.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                hadongActionPerformed(evt);
+                try {
+                    hadongActionPerformed(evt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -211,48 +226,63 @@ public class ListArea extends javax.swing.JFrame {
         pack();
     }// </editor-fold>
 
-    private void caugiayActionPerformed(java.awt.event.ActionEvent evt) {
+    private void caugiayActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Cau Giay";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+//        listSensor.setVisible(true);
+        this.dispose();
     }
 
     private void caugiayMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
-        String location = "Cau Giay";
-        sendMessage(location);
-//        new ListSensor().setVisible(true);
-//        this.dispose();
-        // TODO add your handling code here:
+
     }
 
     private void thanhxuanMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
-        // TODO add your handling code here:
-        String location = "Thanh Xuan";
-        sendMessage(location);
-//        new ListSensor().setVisible(true);
-//        this.dispose();
+
     }
 
     private void badinhMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
         String location = "Ba Dinh";
-        sendMessage(location);
-        // TODO add your handling code here:
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        listSensor.setData(a);
+//        listSensor.setVisible(true);
+        this.dispose();
     }
 
     private void hadongMouseClicked(java.awt.event.MouseEvent evt) throws IOException {
         // TODO add your handling code here:
         String location = "Ha Dong";
-        sendMessage(location);
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        listSensor.setData(a);
+        this.dispose();
     }
 
-    private void thanhxuanActionPerformed(java.awt.event.ActionEvent evt) {
+    private void thanhxuanActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Thanh Xuan";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        this.dispose();
     }
 
-    private void badinhActionPerformed(java.awt.event.ActionEvent evt) {
+    private void badinhActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Ba Dinh";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        this.dispose();
     }
 
-    private void hadongActionPerformed(java.awt.event.ActionEvent evt) {
+    private void hadongActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         // TODO add your handling code here:
+        String location = "Ha Dong";
+        String a = sendMessage(location);
+        ListSensor listSensor = new ListSensor(a);
+        this.dispose();
     }
 
     /**

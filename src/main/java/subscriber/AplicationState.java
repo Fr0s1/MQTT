@@ -27,6 +27,4 @@ public class AplicationState {
         SELECT_SENSOR,
         WAIT_DATA,
     }
-
-
 }
