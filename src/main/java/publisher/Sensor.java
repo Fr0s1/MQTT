@@ -13,16 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONTokener;
 
 public class Sensor {
-    public final static int sensor = 1;
-    public final static String type = "temperature";
-    public final static String MAC = "11:22:33:44:55:66";
-
+    public final static int sensor = 1; //Application = 0, Sensor = 1
     // Set State for Sensor
     enum State {
         HANDSHAKE,
         PUBLISH_DATA
     }
-
     public static void main(String[] args) throws FileNotFoundException {
         String receive;
         String resourceName = System.getProperty("user.dir") + "\\src\\main\\java\\publisher\\csvjson.json";// Set location of json data
@@ -30,6 +26,8 @@ public class Sensor {
         JSONTokener tokener = new JSONTokener(new FileReader(resourceName));
         JSONArray array = new JSONArray(tokener);
         Scanner sc = new Scanner(System.in);
+        System.out.print("Input from client - MAC Address: ");
+        String MAC = sc.nextLine();
         System.out.print("Input from client - location: ");
         String location = sc.nextLine();
         State state = State.HANDSHAKE;
