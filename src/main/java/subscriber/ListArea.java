@@ -30,7 +30,7 @@ public class ListArea extends javax.swing.JFrame{
     public static int PORT = 8080;
     public final static int sensor = 0;
     public String[] MAC = {"84:64:20:46:32:fe", "44:29:06:e1:e1:07", "d5:95:45:8c:95:de", "af:ad:42:69:98:a6", "4e:a8:51:59:85:61",
-                        "1b:8c:47:f2:fc:d9", "d5:2a:2f:e2:62:28", "f9:27:18:8a:ae:06", "5d:0f:e0:dd:82:3b", "81:c0:bf:73:79:3f"};
+            "1b:8c:47:f2:fc:d9", "d5:2a:2f:e2:62:28", "f9:27:18:8a:ae:06", "5d:0f:e0:dd:82:3b", "81:c0:bf:73:79:3f"};
     public String receive;
     public String sendDatatoListSensor;
 
@@ -231,7 +231,7 @@ public class ListArea extends javax.swing.JFrame{
         String location = "Cau Giay";
         String a = sendMessage(location);
         ListSensor listSensor = new ListSensor(a);
-//        listSensor.setVisible(true);
+        listSensor.frame.setVisible(true);
         this.dispose();
     }
 
