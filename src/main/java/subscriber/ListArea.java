@@ -18,10 +18,11 @@ import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
 
 import subscriber.AplicationState;
+
 /**
  * @author ADMIN
  */
-public class ListArea extends javax.swing.JFrame{
+public class ListArea extends javax.swing.JFrame {
 
     /**
      * Creates new form NewJFrame
@@ -37,7 +38,7 @@ public class ListArea extends javax.swing.JFrame{
     public ListArea() {
 
         try {
-            int index = ThreadLocalRandom.current().nextInt(0, 9+1);
+            int index = ThreadLocalRandom.current().nextInt(0, 9 + 1);
             JSONObject jo = new JSONObject();
             jo.put("sensor", sensor);
             jo.put("MAC", MAC[index]);
@@ -55,6 +56,7 @@ public class ListArea extends javax.swing.JFrame{
     public String getSendDatatoListSensor() {
         return sendDatatoListSensor;
     }
+
     public String sendMessage(String location) throws IOException {
         String result = "";
         if (AplicationState.state == AplicationState.State.GET_SENSORS) {
@@ -82,8 +84,8 @@ public class ListArea extends javax.swing.JFrame{
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-        addWindowListener (new WindowAdapter() {
-            public void windowClosing (WindowEvent e) {
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
 //                System.out.println("close");
                 try {
                     AplicationState.connection.close();

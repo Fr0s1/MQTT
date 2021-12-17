@@ -11,6 +11,7 @@ public class AplicationState {
     public static Socket connection;
     public static DataOutputStream sentBuff;
     public static DataInputStream recBuff;
+
     static {
         try {
             connection = new Socket("localhost", 8080);
