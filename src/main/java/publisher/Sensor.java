@@ -26,9 +26,9 @@ public class Sensor {
         JSONTokener tokener = new JSONTokener(new FileReader(resourceName));
         JSONArray array = new JSONArray(tokener);
         Scanner sc = new Scanner(System.in);
-        System.out.print("Input from client - MAC Address: ");
+        System.out.print("Input from client - MAC Address: "); // Input sensor MAC Address
         String MAC = sc.nextLine();
-        System.out.print("Input from client - location: ");
+        System.out.print("Input from client - location: "); // Get sensor location
         String location = sc.nextLine();
         State state = State.HANDSHAKE;
 

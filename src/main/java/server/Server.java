@@ -39,14 +39,14 @@ public class Server {
             Socket s = null;
             try {
                 System.out.println("Wating for connection...");
-                s = ss.accept();
+                s = ss.accept(); // Accept connection from new device
                 sockets.add(s);
 
                 System.out.println("Socket id " + s.hashCode());
-                System.out.println("A new client is connected: " + s);
+                System.out.println("A new device is connected: " + s);
 
-                DataInputStream dis = new DataInputStream(new BufferedInputStream(s.getInputStream()));
-                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+                DataInputStream dis = new DataInputStream(new BufferedInputStream(s.getInputStream())); // Get input stream of socket
+                DataOutputStream dos = new DataOutputStream(s.getOutputStream()); // Get output stream of socket
 
                 System.out.println("Assigning new thread for this client");
 
@@ -92,7 +92,6 @@ class ClientHandler extends Thread {
     @Override
     public void run() {
         String receive;
-        String sent;
         State state = State.HANDSHAKE;
         ApplicationHandlerState applicationHandlerState = null;
         String selectedSensorMAC = null; // Use for sensor's MAC address selected by application
@@ -103,26 +102,24 @@ class ClientHandler extends Thread {
 
         while (true) {
             try {
-                receive = dis.readUTF();
-                System.out.println(receive.length());
+                receive = dis.readUTF(); // Read sent data from connected device
                 System.out.println("receive from client: " + receive);
 
                 if (state == State.HANDSHAKE) {
-
                     Document newDevice = Document.parse(receive);
 
-                    String deviceMacAddress = newDevice.getString("MAC"); // Get new device MAC address
+                    String deviceMacAddress = newDevice.getString("MAC"); // Get new device's MAC address
                     connectedDeviceMAC = deviceMacAddress;
 
-                    Bson filter = Filters.eq("MAC", deviceMacAddress);
+                    Bson macAddrFilter = Filters.eq("MAC", deviceMacAddress);
 
-                    MongoCursor<Document> devices = devicesCollection.find(filter).iterator();
+                    MongoCursor<Document> devices = devicesCollection.find(macAddrFilter).iterator();
 
                     // Check if the device connected to server before
                     if (devices.hasNext()) {
                         // If has connected, update socketId
                         Bson update = Updates.set("socketId", s.hashCode());
-                        devicesCollection.findOneAndUpdate(filter, update);
+                        devicesCollection.findOneAndUpdate(macAddrFilter, update);
                     } else {
                         newDevice.append("socketId", s.hashCode());
                         devicesCollection.insertOne(newDevice);
@@ -263,6 +260,7 @@ class ClientHandler extends Thread {
                     devicesCollection.findOneAndUpdate(findSubscribedSensor, removeApplicationFromSensorSubscribeList);
                 }
 
+                // Delete current socket from in-memory
                 synchronized (this) {
                     Server.sockets.remove(this.s);
                 }
