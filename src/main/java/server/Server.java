@@ -40,7 +40,7 @@ public class Server {
             try {
                 System.out.println("Wating for connection...");
                 s = ss.accept(); // Accept connection from new device
-                sockets.add(s);
+                sockets.add(s); // Keep track of device's socket ID
 
                 System.out.println("Socket id " + s.hashCode());
                 System.out.println("A new device is connected: " + s);
@@ -106,7 +106,7 @@ class ClientHandler extends Thread {
                 System.out.println("receive from client: " + receive);
 
                 if (state == State.HANDSHAKE) {
-                    Document newDevice = Document.parse(receive);
+                    Document newDevice = Document.parse(receive); // Parse handshake message to JSON format
 
                     String deviceMacAddress = newDevice.getString("MAC"); // Get new device's MAC address
                     connectedDeviceMAC = deviceMacAddress;
@@ -117,7 +117,7 @@ class ClientHandler extends Thread {
 
                     // Check if the device connected to server before
                     if (devices.hasNext()) {
-                        // If has connected, update socketId
+                        // If the device has connected before, add socketIO to device information only
                         Bson update = Updates.set("socketId", s.hashCode());
                         devicesCollection.findOneAndUpdate(macAddrFilter, update);
                     } else {
@@ -142,6 +142,7 @@ class ClientHandler extends Thread {
                         if (applicationHandlerState == ApplicationHandlerState.GET_SENSORS) {
                             String location = message.getString("location");
 
+                            // Find all sensor in location
                             String sensorList = ServerAPI.getDevicesByLocation(location);
 
                             dos.writeUTF(sensorList);
@@ -151,13 +152,11 @@ class ClientHandler extends Thread {
                             MongoCollection<Document> devices = db.getCollection("devices");
 
                             String sensorMac = message.getString("MAC");
-                            Bson filter = Filters.eq("MAC", sensorMac);
+                            Bson macAddressFilter = Filters.eq("MAC", sensorMac);
                             selectedSensorMAC = sensorMac;
 
                             Bson update = Updates.push("subscribe_sockets", s.hashCode());
-                            devices.findOneAndUpdate(filter, update);
-
-//                            dos.writeUTF("Sensor selected");
+                            devices.findOneAndUpdate(macAddressFilter, update);
 
                             MongoCollection<Document> sensor_data = db.getCollection("sensor_data");
 
@@ -209,6 +208,7 @@ class ClientHandler extends Thread {
 
                             subscribeSockets = oj.getJSONArray("subscribe_sockets");
                             for (int i = 0; i < subscribeSockets.length(); i++) {
+                                // Select each client which subscribed to this sensor
                                 int subscribeSocketHashCode = subscribeSockets.getInt(i);
 
                                 String finalReceive = receive;
@@ -251,6 +251,7 @@ class ClientHandler extends Thread {
                     System.out.println("Application with MAC " + connectedDeviceMAC + " has disconnected!");
                     System.out.println(selectedSensorMAC);
 
+                    // Remove socket ID of application in sensor's subscribe list
                     Bson removeApplicationFromSensorSubscribeList = Updates.pull("subscribe_sockets", s.hashCode());
 
                     // Update sensor which this application subscribes to

@@ -21,7 +21,7 @@ public class Sensor {
     }
     public static void main(String[] args) throws FileNotFoundException {
         String receive;
-        String resourceName = System.getProperty("user.dir") + "\\csvjson.json";// Set location of json data
+        String resourceName = System.getProperty("user.dir") + "/csvjson.json";// Set location of json data
         Random rd = new Random();
         JSONTokener tokener = new JSONTokener(new FileReader(resourceName));
         JSONArray array = new JSONArray(tokener);
